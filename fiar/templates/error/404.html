@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+    <main class="container">
+        <div class="px-3 py-3 pt-5 pb-5 mx-auto text-center">
+            <h1 class="display-4"><span class="badge bg-danger">#404</span> Page not found</h1>
+        </div>
+        <div class="mx-auto text-center">
+            <img src="{{ url_for('static', filename='images/travolta.png') }}" alt="Page not found">
+        </div>
+    </main>
+{% endblock %}

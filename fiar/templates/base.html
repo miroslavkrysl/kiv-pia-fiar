@@ -1,21 +1,19 @@
-{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <title>{% block title %}{% endblock %} | FIAR </title>
 
-        <link rel="icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
-        <link rel="stylesheet" href="{% static 'lib/bootstrap.min.css' %}">
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap.min.css') }}">
     </head>
     <body>
         {# Dummy script to prevent loading scripts before stylesheets #}
         <script>0</script>
 
-        <script src="{% static 'lib/jquery.min.js' %}"></script>
-        <script src="{% static 'lib/bootstrap.bundle.js' %}"></script>
-        <script src="{% static 'lib/sockjs.min.js' %}"></script>
+        <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
+        <script src="{{ url_for('static', filename='lib/sockjs.min.js') }}"></script>
 
         {% block content %}{% endblock %}
     </body>
