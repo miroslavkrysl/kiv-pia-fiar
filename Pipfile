@@ -9,6 +9,8 @@ psycopg2-binary = "*"
 flask-injector = "*"
 flask-sqlalchemy = "*"
 flask-socketio = "*"
+flask-login = "*"
+flask-mail = "*"
 eventlet = "*"
 gunicorn = "*"
 

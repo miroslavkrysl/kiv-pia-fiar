@@ -5,7 +5,7 @@ from flask_injector import FlaskInjector
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
-from fiar import main
+from fiar import main, auth
 from fiar.config import ProductionConfig, DevelopmentConfig
 from fiar.di import modules
 from fiar.error import register_error_handlers
@@ -29,6 +29,7 @@ else:
 
 # setup routes
 app.register_blueprint(main.bp, url_prefix='')
+app.register_blueprint(auth.bp, url_prefix='')
 
 # initialize dependency injection
 di = FlaskInjector(app=app, modules=modules)

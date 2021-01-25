@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_login import LoginManager
+from flask_mail import Mail
 from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 from injector import Module, singleton, provider
@@ -22,4 +24,27 @@ class SocketIoModule(Module):
         return socket_io
 
 
-modules = [DbModule, SocketIoModule]
+class LoginManagerModule(Module):
+
+    @singleton
+    @provider
+    def provide(self, app: Flask) -> LoginManager:
+        login_manager = LoginManager(app)
+        return login_manager
+
+
+class MailModule(Module):
+
+    @singleton
+    @provider
+    def provide(self, app: Flask) -> Mail:
+        mail = Mail(app)
+        return mail
+
+
+modules = [
+    DbModule,
+    SocketIoModule,
+    LoginManagerModule,
+    MailModule
+]
