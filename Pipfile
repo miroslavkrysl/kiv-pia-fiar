@@ -5,9 +5,12 @@ name = "pypi"
 
 [packages]
 flask = "*"
-Flask-SQLAlchemy = "*"
 psycopg2-binary = "*"
 flask-injector = "*"
+flask-sqlalchemy = "*"
+flask-socketio = "*"
+eventlet = "*"
+gunicorn = "*"
 
 [dev-packages]
 

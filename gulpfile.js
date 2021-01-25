@@ -27,7 +27,7 @@ gulp.task('libs', function () {
         gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css.map'),
         gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.js'),
         gulp.src('node_modules/jquery/dist/jquery.min.js'),
-        gulp.src('node_modules/sockjs-client/dist/sockjs.min.js'),
+        gulp.src('node_modules/socket.io/client-dist/socket.io.js'),
     ).pipe(gulp.dest('fiar/static/lib'));
 });
 
