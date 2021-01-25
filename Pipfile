@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 flask = "*"
+Flask-SQLAlchemy = "*"
+psycopg2-binary = "*"
+flask-injector = "*"
 
 [dev-packages]
 
