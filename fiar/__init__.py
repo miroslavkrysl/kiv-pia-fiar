@@ -2,6 +2,7 @@ import os
 
 from flask import Flask, render_template
 from flask_injector import FlaskInjector
+from flask_socketio import SocketIO
 from flask_sqlalchemy import SQLAlchemy
 
 from fiar import main
@@ -31,3 +32,8 @@ app.register_blueprint(main.bp, url_prefix='')
 
 # initialize dependency injection
 di = FlaskInjector(app=app, modules=modules)
+
+
+if __name__ == '__main__':
+    socket_io = di.injector.get(SocketIO)
+    socket_io.run(app)
