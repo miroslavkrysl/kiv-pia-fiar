@@ -5,13 +5,22 @@ name = "pypi"
 
 [packages]
 flask = "*"
-psycopg2-binary = "*"
+click = "*"
+
+# db
+sqlalchemy = "*"
+pymysql = "*"
+
+# flask extensions
 flask-injector = "*"
-flask-sqlalchemy = "*"
 flask-socketio = "*"
 flask-login = "*"
 flask-mail = "*"
+
+# event engine for socketio
 eventlet = "*"
+
+# wsgi server
 gunicorn = "*"
 
 [dev-packages]

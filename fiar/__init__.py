@@ -2,11 +2,9 @@ import os
 
 from flask import Flask, render_template
 from flask_injector import FlaskInjector
-from flask_socketio import SocketIO
-from flask_sqlalchemy import SQLAlchemy
 
-from fiar import main, auth
-from fiar.config import ProductionConfig, DevelopmentConfig
+from fiar import main, auth, config
+from fiar.db import init_db_command
 from fiar.di import modules
 from fiar.error import register_error_handlers
 
@@ -15,26 +13,17 @@ from fiar.error import register_error_handlers
 app = Flask(__name__)
 
 # setup config
-app_mode = os.environ.get('APP_MODE', 'production')
+app.config.from_pyfile('config.py')
 
-if app_mode == 'production':
-    app.config.from_object(ProductionConfig())
-elif app_mode == 'development':
-    app.config.from_object(DevelopmentConfig())
-else:
-    raise ValueError(f'APP_MODE \'{app_mode}\' not recognized')
-
-# setup errors
-# register_error_handlers(app)
+# setup error handlers
+register_error_handlers(app)
 
 # setup routes
 app.register_blueprint(main.bp, url_prefix='')
-app.register_blueprint(auth.bp, url_prefix='')
+app.register_blueprint(auth.bp, url_prefix='/auth')
+
+# initialize commands
+app.cli.add_command(init_db_command)
 
 # initialize dependency injection
 di = FlaskInjector(app=app, modules=modules)
-
-
-if __name__ == '__main__':
-    socket_io = di.injector.get(SocketIO)
-    socket_io.run(app)
