@@ -6,20 +6,19 @@ name = "pypi"
 [packages]
 flask = "*"
 click = "*"
-
 # db
 sqlalchemy = "*"
 pymysql = "*"
-
+# hashing
+passlib = {extras = ["bcrypt"], version = "*"}
+itsdangerous = "*"
 # flask extensions
 flask-injector = "*"
+flask-wtf = "*"
 flask-socketio = "*"
-flask-login = "*"
 flask-mail = "*"
-
 # event engine for socketio
 eventlet = "*"
-
 # wsgi server
 gunicorn = "*"
 

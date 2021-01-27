@@ -1,16 +1,20 @@
 SECRET_KEY = 'super secret key'
 
-APP_DB_DRIVER = 'mysql+pymysql'
-APP_DB_HOST = 'localhost'
-APP_DB_PORT = '3306'
-APP_DB_NAME = 'pia'
-APP_DB_USER = 'pia'
-APP_DB_PASSWORD = 'pia'
 
-APP_DB_URI = f'{APP_DB_DRIVER}://' \
-           f'{APP_DB_USER}:{APP_DB_PASSWORD}' \
-           f'@{APP_DB_HOST}:{APP_DB_PORT}' \
-           f'/{APP_DB_NAME}'
+# --- Database ---
+
+APP_DB_PROVIDER = 'mysql+pymysql'
+APP_DB_HOST = 'localhost'
+APP_DB_USER = 'pia'
+APP_DB_PORT = '3306'
+APP_DB_PASSWORD = 'pia'
+APP_DB_NAME = 'pia'
+
+APP_DB_URI = f'{APP_DB_PROVIDER}://' \
+             f'{APP_DB_USER}:{APP_DB_PASSWORD}' \
+             f'@{APP_DB_HOST}:{APP_DB_PORT}' \
+             f'/{APP_DB_NAME}'
+
 
 # --- Mail ---
 

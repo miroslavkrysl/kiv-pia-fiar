@@ -1,23 +1,26 @@
 from flask import Flask
-from flask_login import LoginManager
+from flask_injector import FlaskInjector
 from flask_mail import Mail
 from flask_socketio import SocketIO
 from injector import Module, singleton, provider
-from fiar.db import Db
+
+from fiar.persistence.db import Database
+from fiar.persistence.repositories import UserRepository
+from fiar.services.security import HashService
 
 
 class DbModule(Module):
-
     @singleton
     @provider
-    def provide(self, app: Flask) -> Db:
-        database = Db(app.config['APP_DB_URI'])
+    def provide(self, app: Flask) -> Database:
+        return Database(app)
 
-        @app.teardown_appcontext
-        def shutdown_session(error: Exception):
-            database.session.remove()
 
-        return database
+class HashModule(Module):
+    @singleton
+    @provider
+    def provide(self) -> HashService:
+        return HashService()
 
 
 class SocketIoModule(Module):
@@ -29,14 +32,16 @@ class SocketIoModule(Module):
         return socket_io
 
 
-class LoginManagerModule(Module):
+# class MailService(Module):
+#
+#     @singleton
+#     @provider
+#     def provide(self, mail: Mail) -> MailService:
+#         mail_service = MailService(mail)
+#         return mail_service
 
-    @singleton
-    @provider
-    def provide(self, app: Flask) -> LoginManager:
-        login_manager = LoginManager(app)
-        return login_manager
 
+# --- Repositories ---
 
 class MailModule(Module):
 
@@ -47,9 +52,30 @@ class MailModule(Module):
         return mail
 
 
+class UserRepositoryModule(Module):
+
+    @singleton
+    @provider
+    def provide(self, database: Database) -> UserRepository:
+        repository = UserRepository(database)
+        return repository
+
+
 modules = [
     DbModule,
+    UserRepositoryModule,
     SocketIoModule,
-    LoginManagerModule,
+    HashModule,
     MailModule
 ]
+
+
+def initialize_di(app: Flask) -> FlaskInjector:
+    di = FlaskInjector(app=app, modules=modules)
+
+    # Force instantiation of singletons on application startup.
+    # If not done, it causes errors, because some setup logic
+    # may be called after first request, which is late.
+    di.injector.get(Database)
+
+    return di
