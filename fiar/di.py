@@ -6,10 +6,10 @@ from injector import Module, singleton, provider
 
 from fiar.persistence.db import Database
 from fiar.persistence.repositories import UserRepository
-from fiar.services.security import HashService
+from fiar.services.security import HashService, TokenService
 
 
-class DbModule(Module):
+class DatabaseModule(Module):
     @singleton
     @provider
     def provide(self, app: Flask) -> Database:
@@ -21,6 +21,13 @@ class HashModule(Module):
     @provider
     def provide(self) -> HashService:
         return HashService()
+
+
+class TokenModule(Module):
+    @singleton
+    @provider
+    def provide(self, app: Flask) -> TokenService:
+        return TokenService(app.config['SECRET_KEY'], app.config['APP_TOKEN_EXP'])
 
 
 class SocketIoModule(Module):
@@ -62,7 +69,8 @@ class UserRepositoryModule(Module):
 
 
 modules = [
-    DbModule,
+    DatabaseModule,
+    TokenModule,
     UserRepositoryModule,
     SocketIoModule,
     HashModule,

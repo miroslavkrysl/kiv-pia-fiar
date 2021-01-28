@@ -16,5 +16,7 @@ class UserRepository:
         self.db.session.add(user)
         self.db.session.commit()
 
-    # def all_online(self) -> List[User]:
-    #     return self.User.select()
+    def get_by_uid(self, uid: str):
+        return self.db.session.query(User)\
+            .filter_by(uid=uid)\
+            .first()

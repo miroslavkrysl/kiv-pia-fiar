@@ -15,6 +15,7 @@ itsdangerous = "*"
 # flask extensions
 flask-injector = "*"
 flask-wtf = "*"
+flask-login = "*"
 flask-socketio = "*"
 flask-mail = "*"
 # event engine for socketio

@@ -15,6 +15,10 @@ APP_DB_URI = f'{APP_DB_PROVIDER}://' \
              f'@{APP_DB_HOST}:{APP_DB_PORT}' \
              f'/{APP_DB_NAME}'
 
+# --- SECURITY ---
+
+# must be at least 32
+APP_UID_LENGTH = 64
 
 # --- Mail ---
 
