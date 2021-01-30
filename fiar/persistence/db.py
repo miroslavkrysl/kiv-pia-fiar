@@ -28,5 +28,5 @@ def init_db(database: Database):
     """
     from fiar.persistence.models import Base
 
-    Base.metadata.drop_all(bind=database.engine)
+    # Base.metadata.drop_all(bind=database.engine)
     Base.metadata.create_all(bind=database.engine)
