@@ -1,30 +1,18 @@
-from flask import Flask
-from flask_injector import FlaskInjector
+import sys
 
-from fiar.cli import register_commands
-from fiar.controllers import auth, main
-from fiar.di import modules, initialize_di
-from fiar.controllers.error import register_error_handlers
+from fiar import controllers, persistence, services
+from fiar.app import create_app
+from fiar.di import Container, create_container
 
+# create app and app di container
+app = create_app()
+container = create_container(app)
 
-# create and configure the app
-from fiar.persistence.db import Database
+packages = [
+    controllers,
+    persistence,
+    services
+]
 
-app = Flask(__name__)
-
-# setup config
-app.config.from_pyfile('config.py')
-
-# setup error handlers
-register_error_handlers(app)
-
-# setup routes
-app.register_blueprint(main.bp, url_prefix='')
-app.register_blueprint(auth.bp, url_prefix='/auth')
-
-# initialize commands
-register_commands(app)
-
-# initialize dependency injection
-di = initialize_di(app)
-
+# wire all di dependencies
+container.wire(packages=packages)

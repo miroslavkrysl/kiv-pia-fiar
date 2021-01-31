@@ -83,7 +83,7 @@ class UserUniqueIdService:
         while True:
             uid = secrets.token_urlsafe(64)
 
-            if self.user_repo.get_by_uid(uid) is None:
+            if self.user_repo.find_by_uid(uid) is None:
                 return uid
 
 
@@ -122,7 +122,7 @@ class LoginService:
         user_uid = session.get('user_uid')
 
         if user_uid is not None:
-            user = self.user_repo.get_by_uid(user_uid)
+            user = self.user_repo.find_by_uid(user_uid)
         else:
             user = None
 

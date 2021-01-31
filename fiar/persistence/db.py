@@ -1,32 +1,47 @@
 from flask import Flask
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
+
+from fiar.persistence.models import Base
 
 
 class Database:
-    def __init__(self, app: Flask):
-        self.engine = create_engine(app.config['APP_DB_URI'])
+    def __init__(self, uri: str):
+        self.engine = create_engine(uri)
         self.session_factory = scoped_session(sessionmaker(bind=self.engine))
         self.session = None
 
-        @app.before_request
-        def create_session():
+    def start_session(self) -> Session:
+        if self.session is None:
             self.session = self.session_factory()
-            return None
 
-        @app.after_request
-        def remove_session(response):
+        return self.session
+
+    def end_session(self):
+        if self.session is not None:
             self.session_factory.remove()
             self.session = None
-            return response
+
+    def create_tables(self, base: Base):
+        """
+        Clear the existing table and data in database
+        and create new tables.
+        """
+
+        # Base.metadata.drop_all(bind=database.engine)
+        base.metadata.create_all(bind=self.engine)
 
 
-def init_db(database: Database):
-    """
-    Clear the existing table and data in database
-    and create new tables.
-    """
-    from fiar.persistence.models import Base
+def initialize_db(app: Flask):
+    uri = app.config['DB_URI']
+    database = Database(uri)
 
-    # Base.metadata.drop_all(bind=database.engine)
-    Base.metadata.create_all(bind=database.engine)
+    @app.before_request
+    def start_session():
+        database.start_session()
+
+    @app.teardown_appcontext
+    def end_session(exception):
+        database.end_session()
+
+    return database

@@ -1,6 +1,7 @@
 import enum
+from datetime import datetime
 
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, Enum, UniqueConstraint
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, Enum, UniqueConstraint, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -14,7 +15,7 @@ class User(Base):
     email = Column(String(254), unique=True)
     password = Column(String(255), nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
-    is_online = Column(Boolean, default=False, nullable=False)
+    last_active_at = Column(DateTime, default=datetime.now, nullable=False)
     active_game_id = Column(Integer, ForeignKey('game.id', use_alter=True, name='fk_user_active_game_id'), default=None, nullable=True)
 
     # for login/logout purposes
@@ -26,11 +27,11 @@ class User(Base):
 
 class Friendship(Base):
     __tablename__ = 'friendship'
-    left_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    right_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    from_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    to_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
 
-    left_user = relationship("User", foreign_keys="Friendship.left_user_id")
-    right_user = relationship("User", foreign_keys="Friendship.right_user_id")
+    from_user = relationship("User", foreign_keys="Friendship.from_user_id")
+    to_user = relationship("User", foreign_keys="Friendship.to_user_id")
 
 
 class FriendshipRequest(Base):

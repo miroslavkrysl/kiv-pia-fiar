@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 flask = "*"
 click = "*"
+# di
+dependency-injector = "*"
 # db
 sqlalchemy = "*"
 pymysql = "*"
@@ -13,7 +15,6 @@ pymysql = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
 itsdangerous = "*"
 # flask extensions
-flask-injector = "*"
 flask-wtf = "*"
 flask-login = "*"
 flask-socketio = "*"

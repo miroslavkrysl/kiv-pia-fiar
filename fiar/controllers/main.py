@@ -1,17 +1,22 @@
+from dependency_injector.wiring import Provide, inject
 from flask import Blueprint, render_template
 
-from fiar.persistence.models import User
+from fiar.di import Container
 from fiar.persistence.repositories import UserRepository
 
 bp = Blueprint('main', __name__)
 
-i = 0
-
 
 @bp.route('/')
-def index(user_repo: UserRepository):
-    global i
-    users = user_repo.all()
-    user_repo.add(User(username="hello" + str(i)))
-    i += 1
-    return render_template('index.html', users=users)
+@inject
+def lobby(user_repo: UserRepository = Provide[Container.user_repository]):
+    users = user_repo.find_all()
+    return render_template('lobby.html', users=users)
+
+#
+# class Lobby(View):
+#     def dispatch_request(self):
+#         users = User.query.all()
+#         return render_template('users.html', objects=users)
+#
+# app.add_url_rule('/users/', view_func=ShowUsers.as_view('show_users'))

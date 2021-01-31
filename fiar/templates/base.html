@@ -15,6 +15,12 @@
         <script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
         <script src="{{ url_for('static', filename='lib/socket.io.js') }}"></script>
 
+        <header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+            <p class="h5 my-0 me-md-auto fw-normal">FIAR - Five in a Row</p>
+            <a class="btn btn-outline-primary" href="#">Login</a>
+            <a class="btn btn-outline-primary" href="#">Register</a>
+        </header>
+
         {% block content %}{% endblock %}
     </body>
 </html>
