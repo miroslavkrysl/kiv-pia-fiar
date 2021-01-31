@@ -9,9 +9,11 @@
   "devDependencies": {
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
+    "gulp-cli": "^2.3.0",
     "gulp-replace": "^1.0.0",
     "gulp-sass": "^4.1.0",
     "merge-stream": "^2.0.0",
-    "node-sass": "^5.0.0"
+    "node-sass": "^5.0.0",
+    "npm-run": "^5.0.1"
   }
 }

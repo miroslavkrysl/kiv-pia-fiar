@@ -86,6 +86,7 @@ from fiar.persistence.repositories import UserRepository
 #     di.injector.get(Database)
 #
 #     return di
+from fiar.services.security import HashService, UidService
 
 
 class Container(containers.DeclarativeContainer):
@@ -109,9 +110,22 @@ class Container(containers.DeclarativeContainer):
         database,
     )
 
+    # --- Services ---
+
+    hash_service = providers.Singleton(
+        HashService
+    )
+
+    uid_service = providers.Singleton(
+        UidService,
+        user_repository,
+        config.UID_LENGTH
+    )
+
 
 def create_container(app: Flask):
     container = Container(app=app)
+    container.config.from_dict(app.config)
 
     @app.before_first_request
     def init_app_resources():

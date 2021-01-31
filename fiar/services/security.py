@@ -65,7 +65,7 @@ class TokenService:
             return None
 
 
-class UserUniqueIdService:
+class UidService:
     """
     Creating of random unique user ids.
     """
@@ -81,7 +81,7 @@ class UserUniqueIdService:
         :return: Uid string.
         """
         while True:
-            uid = secrets.token_urlsafe(64)
+            uid = secrets.token_hex(self.uid_length // 2)
 
             if self.user_repo.find_by_uid(uid) is None:
                 return uid

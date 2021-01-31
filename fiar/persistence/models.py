@@ -20,7 +20,7 @@ class User(Base):
 
     # for login/logout purposes
     # not stable value, can be changed over time
-    uid = Column(String(64), default=False, nullable=False, unique=True)
+    uid = Column(String(64), nullable=False, unique=True)
 
     active_game = relationship("Game", foreign_keys="User.active_game_id")
 

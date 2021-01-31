@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>{% block title %}{% endblock %} | FIAR </title>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %} | FIAR </title>
 
-        <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
-        <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap.min.css') }}">
-    </head>
-    <body>
-        {# Dummy script to prevent loading scripts before stylesheets #}
-        <script>0</script>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap.min.css') }}">
+</head>
+<body>
+{# Dummy script to prevent loading scripts before stylesheets #}
+<script>0</script>
 
-        <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
-        <script src="{{ url_for('static', filename='lib/socket.io.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/socket.io.js') }}"></script>
 
-        <header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
-            <p class="h5 my-0 me-md-auto fw-normal">FIAR - Five in a Row</p>
-            <a class="btn btn-outline-primary" href="#">Login</a>
-            <a class="btn btn-outline-primary" href="#">Register</a>
-        </header>
+<header class="border-bottom shadow-sm">
+    <nav class="navbar navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand">FIAR - Five in a Row</a>
+            <div class="container-fluid, justify-content-end">
+                <button type="button" class="btn btn-primary" href="#">Login</button>
+                <button type="button" class="btn btn-outline-primary" href="#">Register</button>
+            </div>
+        </div>
+    </nav>
+</header>
 
-        {% block content %}{% endblock %}
-    </body>
+{% block content %}{% endblock %}
+</body>
 </html>

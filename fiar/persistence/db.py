@@ -28,7 +28,7 @@ class Database:
         and create new tables.
         """
 
-        # Base.metadata.drop_all(bind=database.engine)
+        # Base.metadata.drop_all(bind=self.engine)
         base.metadata.create_all(bind=self.engine)
 
 

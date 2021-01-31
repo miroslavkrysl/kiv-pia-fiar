@@ -10,7 +10,7 @@ click = "*"
 dependency-injector = "*"
 # db
 sqlalchemy = "*"
-pymysql = "*"
+psycopg2-binary = "*"
 # hashing
 passlib = {extras = ["bcrypt"], version = "*"}
 itsdangerous = "*"
@@ -23,6 +23,7 @@ flask-mail = "*"
 eventlet = "*"
 # wsgi server
 gunicorn = "*"
+
 
 [dev-packages]
 

@@ -2,10 +2,10 @@ SECRET_KEY = 'super secret key'
 
 # --- Database ---
 
-DB_PROVIDER = 'mysql+pymysql'
-DB_HOST = 'localhost'
+DB_PROVIDER = 'postgres'
+DB_HOST = '127.0.0.1'
+DB_PORT = 5432
 DB_USER = 'pia'
-DB_PORT = 3306
 DB_PASSWORD = 'pia'
 DB_NAME = 'pia'
 
@@ -17,7 +17,7 @@ DB_URI = f'{DB_PROVIDER}://' \
 # --- Security ---
 
 # must be at least 32
-APP_UID_LENGTH = 64
+UID_LENGTH = 64
 
 # --- Game ---
 
