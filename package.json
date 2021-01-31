@@ -16,5 +16,8 @@
     "merge-stream": "^2.0.0",
     "node-sass": "^5.0.0",
     "npm-run": "^5.0.1"
+  },
+  "scripts": {
+    "gulp": "gulp"
   }
 }
