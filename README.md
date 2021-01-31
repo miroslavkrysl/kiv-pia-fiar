@@ -12,3 +12,5 @@ npm run gulp bundle
 docker-compose build    # or podman-compose build
 docker-compose up       # or podman-compose up
 ```
+
+Default server address: `http://127.0.0.1:8000/`
