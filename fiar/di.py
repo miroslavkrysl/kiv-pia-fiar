@@ -1,5 +1,3 @@
-import sys
-
 from dependency_injector import containers, providers
 from flask import Flask, request
 from flask_socketio import SocketIO
@@ -86,7 +84,7 @@ from fiar.persistence.repositories import UserRepository
 #     di.injector.get(Database)
 #
 #     return di
-from fiar.services.security import HashService, UidService
+from fiar.services.security import HashService, UidService, AuthService
 
 
 class Container(containers.DeclarativeContainer):
@@ -120,6 +118,12 @@ class Container(containers.DeclarativeContainer):
         UidService,
         user_repository,
         config.UID_LENGTH
+    )
+
+    auth_service = providers.Singleton(
+        AuthService,
+        app,
+        user_repository
     )
 
 

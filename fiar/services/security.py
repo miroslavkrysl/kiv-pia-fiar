@@ -87,7 +87,7 @@ class UidService:
                 return uid
 
 
-class LoginService:
+class AuthService:
     """
     Takes care of users login and logout as well as loading
     of the currently logged user.

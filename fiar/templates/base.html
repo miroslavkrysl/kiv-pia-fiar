@@ -14,17 +14,14 @@
 <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/socket.io.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/zxcvbn.js') }}"></script>
 
-<header class="border-bottom shadow-sm">
-    <nav class="navbar navbar-light bg-light">
-        <div class="container">
-            <a class="navbar-brand">FIAR - Five in a Row</a>
-            <div class="container-fluid, justify-content-end">
-                <button type="button" class="btn btn-primary" href="#">Login</button>
-                <button type="button" class="btn btn-outline-primary" href="#">Register</button>
-            </div>
-        </div>
-    </nav>
+<header class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm p-3 px-md-4 mb-3 bg-light">
+    <div class="container">
+        <a class="navbar-brand me-md-auto" href="{{ url_for('main.lobby') }}">FIAR - Five in a Row</a>
+        <a class="btn btn-primary me-2" href="#">Login</a>
+        <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Register</a>
+    </div>
 </header>
 
 {% block content %}{% endblock %}

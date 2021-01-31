@@ -28,6 +28,7 @@ gulp.task('libs', function () {
         gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.js'),
         gulp.src('node_modules/jquery/dist/jquery.min.js'),
         gulp.src('node_modules/socket.io/client-dist/socket.io.js'),
+        gulp.src('node_modules/zxcvbn/dist/zxcvbn.js'),
     ).pipe(gulp.dest('fiar/static/lib'));
 });
 

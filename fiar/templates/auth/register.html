@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4">
+                <h4 class="mb-3">Registration</h4>
+                <form>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control app-pwd-strength" id="password" data-strength-bar="strength-bar">
+                    </div>
+                    <p class="form-text mb-1">Password strength</p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" id="strength-bar" role="progressbar" style="width: 0" aria-valuenow="0"
+                             aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password-check" class="form-label">Password check</label>
+                        <input type="password" class="form-control" id="password-check">
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/pwd_strength.js') }}"></script>
+{% endblock %}
+

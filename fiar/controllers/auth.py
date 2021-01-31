@@ -1,4 +1,8 @@
-from flask import Blueprint
+from dependency_injector.wiring import inject, Provide
+from flask import Blueprint, render_template
+
+from fiar.di import Container
+from fiar.services.security import AuthService
 
 bp = Blueprint('auth', __name__)
 
@@ -24,3 +28,9 @@ def login():
     #     return flask.redirect(next or flask.url_for('index'))
     # return flask.render_template('login.html', form=form)
     pass
+
+
+@bp.route('/register')
+@inject
+def register(auth: AuthService = Provide[Container.auth_service]):
+    return render_template('auth/register.html')
