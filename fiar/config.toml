@@ -1,12 +1,12 @@
 SECRET_KEY = 'ViCAZJknGALnmoVcMSimhmT5GT4gIpcK89MCiJGtzxC'
 
 [DATABASE]
-HOST = '127.0.0.1'
-NAME = 'pia'
-PASSWORD = 'pia'
-PORT = 5432
 PROVIDER = 'postgres'
+HOST = '127.0.0.1'
+PORT = 5432
+NAME = 'pia'
 USER = 'pia'
+PASSWORD = 'pia'
 
 [GAME]
 BOARD_DEFAULT_SIZE = 15

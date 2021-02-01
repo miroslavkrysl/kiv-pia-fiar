@@ -1,97 +1,19 @@
 from dependency_injector import containers, providers
-from flask import Flask, request
+from dependency_injector.wiring import inject, Provide
+from flask import Flask, request, Config, g
 from flask_socketio import SocketIO
+from pony.orm import Database, db_session
 
-from fiar.persistence.db import initialize_db
-from fiar.persistence.repositories import UserRepository
-
-
-# class DatabaseModule(Module):
-#     @singleton
-#     @provider
-#     def provide(self, app: Flask) -> Database:
-#         return Database(app)
-#
-#
-# class HashModule(Module):
-#     @singleton
-#     @provider
-#     def provide(self) -> HashService:
-#         return HashService()
-#
-#
-# class TokenModule(Module):
-#     @singleton
-#     @provider
-#     def provide(self, app: Flask) -> TokenService:
-#         return TokenService(app.config['SECRET_KEY'], app.config['APP_TOKEN_EXP'])
-#
-#
-# class SocketIoModule(Module):
-#
-#     @singleton
-#     @provider
-#     def provide(self, app: Flask) -> SocketIO:
-#         socket_io = SocketIO(app)
-#         return socket_io
-#
-#
-# # class MailService(Module):
-# #
-# #     @singleton
-# #     @provider
-# #     def provide(self, mail: Mail) -> MailService:
-# #         mail_service = MailService(mail)
-# #         return mail_service
-#
-#
-# # --- Repositories ---
-#
-# class MailModule(Module):
-#
-#     @singleton
-#     @provider
-#     def provide(self, app: Flask) -> Mail:
-#         mail = Mail(app)
-#         return mail
-#
-#
-# class UserRepositoryModule(Module):
-#
-#     @singleton
-#     @provider
-#     def provide(self, database: Database) -> UserRepository:
-#         repository = UserRepository(database)
-#         return repository
-#
-#
-# modules = [
-#     DatabaseModule,
-#     TokenModule,
-#     UserRepositoryModule,
-#     SocketIoModule,
-#     HashModule,
-#     MailModule
-# ]
-#
-#
-# def initialize_di(app: Flask) -> FlaskInjector:
-#     di = FlaskInjector(app=app, modules=modules)
-#
-#     # Force instantiation of singletons on application startup.
-#     # If not done, it causes errors, because some setup logic
-#     # may be called after first request, which is late.
-#     di.injector.get(Database)
-#
-#     return di
-from fiar.services.security import HashService, UidService, AuthService
+from fiar.db import database
 
 
 class Container(containers.DeclarativeContainer):
-    config = providers.Configuration()
+    container_config = providers.Configuration()
 
     app = providers.Dependency(instance_of=Flask)
-    database = providers.Resource(initialize_db, app)
+
+    # --- Database ---
+    db = providers.Object(database)
 
     # --- websockets - Socket.IO ---
     socket_io = providers.Singleton(
@@ -103,44 +25,71 @@ class Container(containers.DeclarativeContainer):
     request = providers.Resource(lambda: request)
 
     # --- Repositories ---
-    user_repository = providers.Singleton(
-        UserRepository,
-        database,
-    )
-
-    # --- Services ---
-
-    hash_service = providers.Singleton(
-        HashService
-    )
-
-    uid_service = providers.Singleton(
-        UidService,
-        user_repository,
-        config.UID_LENGTH
-    )
-
-    auth_service = providers.Singleton(
-        AuthService,
-        app,
-        user_repository
-    )
+    # user_dao = providers.Singleton(
+    #     UserDao,
+    #     database,
+    # )
+    #
+    # # --- Services ---
+    #
+    # hash_service = providers.Singleton(
+    #     HashService
+    # )
+    #
+    # uid_service = providers.Singleton(
+    #     UidService,
+    #     user_dao,
+    #     config.UID_LENGTH
+    # )
+    #
+    # auth_service = providers.Singleton(
+    #     AuthService,
+    #     app,
+    #     user_dao
+    # )
 
 
 def create_container(app: Flask):
     container = Container(app=app)
-    container.config.from_dict(app.config)
+    app = container.app()
 
-    @app.before_first_request
-    def init_app_resources():
-        container.database.init()
-
-    @app.before_request
-    def init_request_resources():
-        container.request.init()
-
-    @app.teardown_request
-    def shutdown_request_resources(self):
-        pass
+    app.before_first_request(before_first_request)
+    app.before_request(before_request)
+    app.teardown_appcontext(teardown_appcontext)
 
     return container
+
+
+@inject
+def before_first_request(container: Container = Provide[Container],
+                         app: Flask = Provide[Container.app],
+                         db: Database = Provide[Container.db]):
+    # setup database connection
+    db_config = app.config['DATABASE']
+    db.bind(provider=db_config['PROVIDER'],
+            user=db_config['USER'],
+            password=db_config['PASSWORD'],
+            host=db_config['HOST'],
+            database=db_config['NAME'])
+    db.generate_mapping(create_tables=True)
+
+    # setup session variable
+    container.db_session = None
+
+
+@inject
+def before_request(container: Container = Provide[Container]):
+    # setup the request instance
+    container.request.init()
+
+    # setup the database session
+    container.db_session = db_session().__enter__()
+
+
+@inject
+def teardown_appcontext(exception,
+                        container: Container = Provide[Container]):
+    # end the database session
+    if getattr(container, 'db_session', None) is not None:
+        container.db_session.__exit__()
+        container.db_session = None

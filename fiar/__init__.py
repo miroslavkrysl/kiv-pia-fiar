@@ -1,7 +1,7 @@
 import sys
 
 from fiar.app import create_app
-from fiar.di import Container, create_container
+from fiar.di import create_container
 
 # create app and app di container
 app = create_app()

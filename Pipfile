@@ -26,6 +26,7 @@ flask-restx = "*"
 eventlet = "*"
 # wsgi server
 gunicorn = "*"
+pony = "*"
 
 [dev-packages]
 
