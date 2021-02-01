@@ -1,16 +1,20 @@
+from collections import namedtuple
+
 from flask import Flask
 
-import fiar.config
 from fiar.cli import register_commands
-from fiar.controllers import main, auth
-from fiar.controllers.error import register_error_handlers
+from fiar.routes import main, auth
+from fiar.routes.error import register_error_handlers
+from fiar.utils import load_config
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
 
     # setup config
-    app.config.from_object(fiar.config)
+    config_dict = load_config(app)
+    config = namedtuple('Conf', config_dict.keys())(**config_dict)
+    app.config.from_object(config)
 
     # setup error handlers
     register_error_handlers(app)

@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 flask = "*"
 click = "*"
+rtoml = "*"
+pathlib = "*"
 # di
 dependency-injector = "*"
 # db
@@ -14,16 +16,16 @@ psycopg2-binary = "*"
 # hashing
 passlib = {extras = ["bcrypt"], version = "*"}
 itsdangerous = "*"
+# forms
+marshmallow = "*"
 # flask extensions
-flask-wtf = "*"
-flask-login = "*"
 flask-socketio = "*"
 flask-mail = "*"
+flask-restx = "*"
 # event engine for socketio
 eventlet = "*"
 # wsgi server
 gunicorn = "*"
-
 
 [dev-packages]
 
