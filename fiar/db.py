@@ -1,4 +1,6 @@
 from datetime import datetime
+
+from flask import Flask
 from pony.orm import *
 
 database = Database()
@@ -8,10 +10,11 @@ class User(database.Entity):
     id = PrimaryKey(int, auto=True)
     username = Required(str, 32, unique=True)
     email = Required(str, 255, unique=True)
-    password = Required(str, 60)
+    password = Required(str, 100)
     is_admin = Required(bool)
-    last_active_at = Required(datetime)
     uid = Required(str, 128, unique=True)
+    last_active_at = Required(datetime)
+
 
 # import enum
 # from datetime import datetime
@@ -119,3 +122,27 @@ class User(database.Entity):
 #
 #     game = relationship('Game', uselist=False)
 #     winner = relationship('User', uselist=False)
+
+
+class Db:
+    def __init__(self, app: Flask):
+        db_config = app.config['DATABASE']
+        database.bind(provider=db_config['PROVIDER'],
+                      user=db_config['USER'],
+                      password=db_config['PASSWORD'],
+                      host=db_config['HOST'],
+                      database=db_config['NAME'])
+        database.generate_mapping(check_tables=False)
+
+        self.database = database
+        self.session = None
+
+        app.before_request(self._enter_session)
+        app.teardown_appcontext(lambda e: self._exit_session)
+
+    def _enter_session(self):
+        self.session = db_session().__enter__()
+
+    def _exit_session(self):
+        self.session.__exit__()
+        self.session = None
