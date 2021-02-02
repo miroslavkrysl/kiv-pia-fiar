@@ -21,7 +21,6 @@ marshmallow = "*"
 # flask extensions
 flask-socketio = "*"
 flask-mail = "*"
-flask-restx = "*"
 # event engine for socketio
 eventlet = "*"
 # wsgi server

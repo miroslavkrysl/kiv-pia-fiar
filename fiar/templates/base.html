@@ -4,12 +4,17 @@
     <meta charset="utf-8">
     <title>{% block title %}{% endblock %} | FIAR </title>
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.ico') }}"/>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.png') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap.min.css') }}">
 </head>
 <body>
 {# Dummy script to prevent loading scripts before stylesheets #}
 <script>0</script>
+
+<script type=text/javascript>
+    // set script uri root for ajax calls
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
 
 <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
@@ -18,9 +23,14 @@
 
 <header class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm p-3 px-md-4 mb-3 bg-light">
     <div class="container">
-        <a class="navbar-brand me-md-auto" href="{{ url_for('main.lobby') }}">FIAR - Five in a Row</a>
-        <a class="btn btn-primary me-2" href="#">Login</a>
-        <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Register</a>
+        <a class="navbar-brand me-auto" href="{{ url_for('lobby.index') }}">FIAR - Five in a Row</a>
+
+        {% if g.auth.user %}
+            <button type="button" class="btn btn-primary">{{ g.auth.user.username }}</button>
+        {% else %}
+            <a class="btn btn-primary me-2" href="{{ url_for('auth.login') }}">Login</a>
+            <a class="btn btn-outline-primary" href="{{ url_for('auth.register') }}">Register</a>
+        {% endif %}
     </div>
 </header>
 

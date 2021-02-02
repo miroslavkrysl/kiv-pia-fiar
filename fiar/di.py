@@ -40,10 +40,11 @@ class Container(containers.DeclarativeContainer):
         uid_service
     )
 
-    auth_service = providers.Singleton(
+    auth_service = providers.Resource(
         AuthService,
         app,
-        user_repo
+        user_repo,
+        hash_service
     )
 
 
@@ -53,6 +54,7 @@ def create_container(app: Flask):
 
     # initialize db instance
     container.db.init()
+    container.auth_service.init()
 
     app.before_first_request(before_first_request)
     app.before_request(before_request)

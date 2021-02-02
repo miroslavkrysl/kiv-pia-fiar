@@ -1,53 +1,89 @@
-from flask import Flask, session, g
+from typing import Optional
+
+from flask import session, g, Flask
 
 from fiar.db import User
 from fiar.repositories.user import UserRepo
+from fiar.services.hash import HashService
 
 
 class AuthService:
     """
-    Takes care of users login and logout as well as loading
-    the currently logged user.
-
-    Currently logged user is stored in g.user.
-
+    Takes care of authenticating users, login and logout within the session
+    as well as loading the currently logged user from the session.
     """
-    def __init__(self, app: Flask, user_repo: UserRepo):
-        self.user_repo = user_repo
 
-        app.before_request(self._load_user)
+    SESSION_UID_NAME = 'user_uid'
+    G_VAR_NAME = 'auth'
+    G_USER_NAME = 'user'
+
+    def __init__(self, app: Flask, user_repo: UserRepo, hash_service: HashService):
+        self.user_repo = user_repo
+        self.hash_service = hash_service
+
+        app.before_request(self._before_request)
+
+    def auth_email_password(self, email: str, password: str) -> Optional[User]:
+        """
+        Authenticate the user.
+        :param email: Email.
+        :param password: Raw password.
+        :return: The authenticated user or None on fail.
+        """
+        user = self.user_repo.get_by_email(email)
+
+        if user is None:
+            return None
+
+        if not self.hash_service.verify(password, user.password):
+            return None
+
+        return user
 
     def login(self, user: User):
         """
-        Login the user.
+        Login the user within the session.
         :param user: The user instance.
         """
-        session['user_uid'] = user.uid
-        self._update_user(user)
+        session[self.SESSION_UID_NAME] = user.uid
+        self._set_user(user)
 
     def logout(self):
         """
-        Logout the user.
+        Logout the user from the session.
         """
-        if 'user_uid' in session:
-            session.pop('user_uid')
+        if self.SESSION_UID_NAME in session:
+            session.pop(self.SESSION_UID_NAME)
 
-    def _load_user(self):
+        self._set_user(None)
+
+    def get_user(self) -> Optional[User]:
         """
-        Load the currently logged user from session.
+        Get the currently logged user from the session.
         """
-        user_uid = session.get('user_uid')
+        return self._get_user()
+
+    def _before_request(self):
+        print('useeeer')
+        # setup auth global var
+        setattr(g, self.G_VAR_NAME, {})
+
+        # load user
+        user_uid = session.get(self.SESSION_UID_NAME)
 
         if user_uid is not None:
             user = self.user_repo.get_by_uid(user_uid)
+
+            if user is None:
+                # invalid uid
+                session.pop(self.SESSION_UID_NAME)
         else:
             user = None
 
-        self._update_user(user)
+        self._set_user(user)
 
-    def _update_user(self, user: User):
-        """
-        Store logged user instance into the app context.
-        :param user: User to be stored.
-        """
-        g.user = user
+    def _set_user(self, user: Optional[User]):
+        getattr(g, self.G_VAR_NAME)[self.G_USER_NAME] = user
+
+    def _get_user(self) -> User:
+        return getattr(g, self.G_VAR_NAME)[self.G_USER_NAME]
