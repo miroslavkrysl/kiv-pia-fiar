@@ -1,6 +1,7 @@
+from functools import wraps
 from typing import Optional
 
-from flask import session, g, Flask
+from flask import session, g, Flask, redirect, url_for, request
 
 from fiar.db import User
 from fiar.repositories.user import UserRepo
@@ -14,14 +15,16 @@ class AuthService:
     """
 
     SESSION_UID_NAME = 'user_uid'
-    G_VAR_NAME = 'auth'
+    G_PREFIX = 'auth_'
     G_USER_NAME = 'user'
 
     def __init__(self, app: Flask, user_repo: UserRepo, hash_service: HashService):
         self.user_repo = user_repo
         self.hash_service = hash_service
 
-        app.before_request(self._before_request)
+        @app.before_request
+        def auth():
+            self._load_user()
 
     def auth_email_password(self, email: str, password: str) -> Optional[User]:
         """
@@ -63,10 +66,9 @@ class AuthService:
         """
         return self._get_user()
 
-    def _before_request(self):
-        print('useeeer')
+    def _load_user(self):
         # setup auth global var
-        setattr(g, self.G_VAR_NAME, {})
+        setattr(g, self.G_PREFIX + self.G_USER_NAME, {})
 
         # load user
         user_uid = session.get(self.SESSION_UID_NAME)
@@ -83,7 +85,9 @@ class AuthService:
         self._set_user(user)
 
     def _set_user(self, user: Optional[User]):
-        getattr(g, self.G_VAR_NAME)[self.G_USER_NAME] = user
+        setattr(g, self.G_PREFIX + self.G_USER_NAME, user)
 
     def _get_user(self) -> User:
-        return getattr(g, self.G_VAR_NAME)[self.G_USER_NAME]
+        return getattr(g, self.G_PREFIX + self.G_USER_NAME)
+
+

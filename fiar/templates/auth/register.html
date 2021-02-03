@@ -40,3 +40,41 @@
     <script src="{{ url_for('static', filename='js/pwd_strength.js') }}"></script>
 {% endblock %}
 
+
+{% block scripts %}
+    <script>
+        {#$("#login-form").submit(function (event) {#}
+        {#    event.preventDefault();#}
+        {##}
+        {#    let form = $(this);#}
+        {#    let url = form.attr('action');#}
+        {#    let method = form.attr('method');#}
+        {##}
+        {#    $.ajax({#}
+        {#        url: url,#}
+        {#        type: method,#}
+        {#        dataType: 'json',#}
+        {#        data: form.serialize(),#}
+        {#        success: function (response) {#}
+        {#            $(location).attr('href', '/');#}
+        {#        },#}
+        {#        error: function (response) {#}
+        {#            let data = response.responseJSON;#}
+        {##}
+        {#            if (data.error) {#}
+        {#                let message = $("#error-message");#}
+        {#                message.text(data.errors);#}
+        {#                message.removeClass('d-none');#}
+        {#            } else {#}
+        {#                $.each(data.errors, function (key, val) {#}
+        {#                    $("#login-form input[name=" + key + "]").addClass("is-invalid");#}
+        {#                    $("#login-form #feedback-" + key + "]").text(val);#}
+        {#                });#}
+        {#            }#}
+        {##}
+        {#            $("#login-form").addClass('was-validated');#}
+        {#        }#}
+        {#    });#}
+        {#});#}
+    </script>
+{% endblock %}

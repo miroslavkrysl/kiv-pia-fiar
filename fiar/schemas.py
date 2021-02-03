@@ -26,7 +26,7 @@ class UserSchema(Schema):
         return {key: data}
 
 
-user_register_schema = UserSchema()
+user_schema = UserSchema()
 user_login_schema = UserSchema(only=[
         'email',
         'password'
