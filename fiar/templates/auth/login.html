@@ -7,21 +7,56 @@
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4">
                 <h4 class="mb-3">Login</h4>
-                <form id="#login-form" method="POST">
+
+                <div class="alert alert-danger me-auto d-none" role="alert" id="error-message">
+                </div>
+
+                <form id="login-form" method="POST" action="{{ url_for('auth.login_api') }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="email" name="email">
+                        <input type="email" class="form-control" name="email">
+                        <div class="invalid-feedback" id="feedback-email">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control app-pwd-strength" id="password" name="password" data-strength-bar="strength-bar">
+                        <input type="password" class="form-control app-pwd-strength" name="password"
+                               data-strength-bar="strength-bar">
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary float-end">Login</button>
                 </form>
             </div>
         </div>
     </div>
 {% endblock %}
 
+{% block scripts %}
+    <script>
+        $("#login-form").submit(function (event) {
+            event.preventDefault();
+
+            let form = $(this);
+            let url = form.attr('action');
+            let method = form.attr('method');
+
+            $.ajax({
+                url: url,
+                type: method,
+                dataType: 'json',
+                data: form.serialize(),
+                success: function (response) {
+                    $(location).attr('href', '/');
+                },
+                error: function (response) {
+                    let data = response.responseJSON;
+
+                    if (data.error) {
+                        let message = $("#error-message");
+                        message.text(data.error);
+                        message.removeClass('d-none');
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
