@@ -1,5 +1,7 @@
+from functools import wraps
+
 from dependency_injector.wiring import inject, Provide
-from flask import Blueprint, render_template, Request, g, redirect, url_for, jsonify
+from flask import Blueprint, render_template, Request, g, redirect, url_for, jsonify, request
 from flask.views import MethodView
 from marshmallow import Schema, fields, validate, pre_load, ValidationError
 
@@ -40,7 +42,6 @@ class LoginSchema(Schema):
 class LoginApi(MethodView):
     @inject
     def post(self,
-             request: Request = Provide[Container.request],
              auth_service: AuthService = Provide[Container.auth_service]):
         try:
             data = user_login_schema.load(request.form)
@@ -50,7 +51,7 @@ class LoginApi(MethodView):
         user = auth_service.auth_email_password(**data)
 
         if user is None:
-            return jsonify({"errors": "Wrong email or password"}), 401
+            return jsonify({"error": "Wrong email or password"}), 401
 
         auth_service.login(user)
         return jsonify(), 201
@@ -59,7 +60,7 @@ class LoginApi(MethodView):
     def delete(self,
                auth_service: AuthService = Provide[Container.auth_service]):
         if auth_service.get_user() is None:
-            return jsonify({"errors": "Not logged in"}), 404
+            return jsonify({"error": "Not logged in"}), 404
 
         auth_service.logout()
         return jsonify(), 200
