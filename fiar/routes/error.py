@@ -9,16 +9,16 @@ def register_error_handlers(app: Flask):
 
 
 def error400(exception):
-    return render_template('error/400.html'), 400
+    return render_template('error.html', description=exception.description, code=400), 400
 
 
 def error403(exception):
-    return render_template('error/403.html'), 403
+    return render_template('error.html', description=exception.description, code=403), 403
 
 
 def error404(exception):
-    return render_template('error/404.html'), 404
+    return render_template('error.html', description=exception.description, code=404), 404
 
 
 def error500(exception):
-    return render_template('error/500.html'), 500
+    return render_template('error.html', description=exception.description, code=500), 500
