@@ -11,7 +11,7 @@
                 <div class="alert alert-danger me-auto d-none" role="alert" id="error-message">
                 </div>
 
-                <form id="login-form" method="POST" action="{{ url_for('auth.login_api') }}">
+                <form id="login-form" method="POST" action="{{ url_for('user.login_api') }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
                         <input type="email" class="form-control" name="email">

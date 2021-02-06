@@ -42,9 +42,6 @@ $(".app-pwd-strength").on('input', function () {
 
     let bar_id = "#" + $(this).attr("data-strength-bar");
 
-    console.log(color_class)
-    console.log(width)
-
     $(bar_id).css('width', width+'%').attr('aria-valuenow', width);
     $(bar_id).removeClass(
         ['bg-danger',

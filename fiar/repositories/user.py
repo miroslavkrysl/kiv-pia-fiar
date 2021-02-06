@@ -46,7 +46,7 @@ class UserRepo:
                email: str,
                password: str,
                is_admin: bool = False,
-               last_active_at: datetime = datetime.min) -> int:
+               last_active_at: datetime = datetime.min) -> User:
         password = self.hash_service.hash(password)
         uid = self.uid_service.make_uid(self.get_by_uid)
 
@@ -59,4 +59,4 @@ class UserRepo:
             last_active_at=last_active_at)
         user.flush()
 
-        return user.id
+        return user

@@ -41,6 +41,8 @@ class AuthService:
         if not self.hash_service.verify(password, user.password):
             return None
 
+        self._set_user(user)
+
         return user
 
     def login(self, user: User):
@@ -65,6 +67,12 @@ class AuthService:
         Get the currently logged user from the session.
         """
         return self._get_user()
+
+    def is_authenticated(self) -> bool:
+        """
+        Check if the current user is authenticated.
+        """
+        return self._get_user() is not None
 
     def _load_user(self):
         # setup auth global var
