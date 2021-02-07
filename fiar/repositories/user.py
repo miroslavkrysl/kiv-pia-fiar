@@ -5,8 +5,6 @@ from typing import Iterable
 import pony.orm
 
 from fiar.db import User
-from fiar.services.hash import HashService
-from fiar.services.uid import UidService
 
 
 class UserRepo:
@@ -15,9 +13,8 @@ class UserRepo:
         USERNAME = User.username
         EMAIL = User.email
 
-    def __init__(self, hash_service: HashService, uid_service: UidService):
-        self.hash_service = hash_service
-        self.uid_service = uid_service
+    def __init__(self):
+        pass
 
     def get_by_id(self, id: int) -> User:
         return User.get(id=id)
@@ -41,22 +38,8 @@ class UserRepo:
         threshold = now - max_inactive_time
         return User.select(lambda p: p.last_active_at > threshold)
 
-    def create(self,
-               username: str,
-               email: str,
-               password: str,
-               is_admin: bool = False,
-               last_active_at: datetime = datetime.min) -> User:
-        password = self.hash_service.hash(password)
-        uid = self.uid_service.make_uid(self.get_by_uid)
-
-        user = User(
-            username=username,
-            email=email,
-            password=password,
-            is_admin=is_admin,
-            uid=uid,
-            last_active_at=last_active_at)
+    def add(self, **kwargs) -> User:
+        user = User(**kwargs)
         user.flush()
 
         return user

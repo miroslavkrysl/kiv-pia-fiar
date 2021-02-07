@@ -28,7 +28,7 @@ class AuthService:
 
     def auth_email_password(self, email: str, password: str) -> Optional[User]:
         """
-        Authenticate the user.
+        Authenticate the user by email and password.
         :param email: Email.
         :param password: Raw password.
         :return: The authenticated user or None on fail.
@@ -40,8 +40,6 @@ class AuthService:
 
         if not self.hash_service.verify(password, user.password):
             return None
-
-        self._set_user(user)
 
         return user
 

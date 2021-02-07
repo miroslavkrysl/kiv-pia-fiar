@@ -3,7 +3,7 @@ from collections import namedtuple
 from flask import Flask
 
 from fiar.cli import register_commands
-from fiar.routes import lobby, auth, game
+from fiar.routes import lobby, user, game
 from fiar.routes.error import register_error_handlers
 from fiar.utils import load_config
 
@@ -21,7 +21,7 @@ def create_app() -> Flask:
 
     # setup routes
     app.register_blueprint(lobby.bp, url_prefix='/')
-    app.register_blueprint(auth.bp, url_prefix='/auth')
+    app.register_blueprint(user.bp, url_prefix='/user')
     app.register_blueprint(game.bp, url_prefix='/game')
 
     # initialize commands

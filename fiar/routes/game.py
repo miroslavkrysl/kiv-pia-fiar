@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 from flask import Blueprint, render_template
 
-from fiar.routes.decorators import auth_required
+from fiar.routes.decorators import auth_required, admin_required
 from fiar.di import Container
 from fiar.repositories.user import UserRepo
 

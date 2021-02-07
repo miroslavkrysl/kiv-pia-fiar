@@ -16,12 +16,23 @@ class UserSchema(Schema):
 
     @post_load
     def process_input(self, data, **kwargs):
-        data["email"] = data["email"].lower().strip()
+        if "email" in data:
+            data["email"] = data["email"].lower().strip()
         return data
 
 
 user_schema = UserSchema()
+
 user_login_schema = UserSchema(only=[
         'email',
         'password'
+])
+
+user_pswd_reset_schema = UserSchema(only=[
+        'password'
+])
+
+
+user_pswd_reset_email_schema = UserSchema(only=[
+        'email'
 ])

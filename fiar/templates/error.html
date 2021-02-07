@@ -5,14 +5,14 @@
 {% block content %}
     <main class="container">
         <div class="px-3 py-3 pt-5 pb-5 mx-auto text-center">
-            <h1><span class="badge bg-danger">#{{ code }}</span> Page not found</h1>
+            <h1><span class="badge bg-danger">#{{ code }}</span> {{ name }}</h1>
             {% if description %}
                 <h2 class="mb-2 text-muted">{{ description }}</h2>
             {% endif %}
         </div>
         {% if code == 404 %}
             <div class="mx-auto text-center">
-                <img src="{{ url_for('static', filename='images/travolta.png') }}" alt="Page not found">
+                <img src="{{ url_for('static', filename='images/travolta.png') }}" alt="{{ name }}">
             </div>
         {% endif %}
     </main>

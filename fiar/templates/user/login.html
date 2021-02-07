@@ -20,9 +20,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control app-pwd-strength" name="password"
-                               data-strength-bar="strength-bar">
+                        <input type="password" class="form-control" name="password">
                     </div>
+                    <a href="{{ url_for('user.forgot_password') }}">Forgot your password?</a>
                     <button type="submit" class="btn btn-primary float-end">Login</button>
                 </form>
             </div>
@@ -39,6 +39,9 @@
             let url = form.attr('action');
             let method = form.attr('method');
 
+            let submit_button = form.find('[type=submit]');
+            submit_button.prop('disabled', true);
+
             $.ajax({
                 url: url,
                 type: method,
@@ -48,6 +51,7 @@
                     $(location).attr('href', '/');
                 },
                 error: function (response) {
+                    submit_button.prop('disabled', false);
                     let data = response.responseJSON;
 
                     if (data.error) {

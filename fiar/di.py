@@ -7,7 +7,11 @@ from fiar.db import Db
 from fiar.repositories.user import UserRepo
 from fiar.services.auth import AuthService
 from fiar.services.hash import HashService
+from fiar.services.mail import MailService
+from fiar.services.pswd_reset import PswdResetService
+from fiar.services.token import TokenService
 from fiar.services.uid import UidService
+from fiar.services.user import UserService
 
 
 class Container(containers.DeclarativeContainer):
@@ -23,7 +27,21 @@ class Container(containers.DeclarativeContainer):
         app
     )
 
-    request = providers.Resource(lambda: request)
+    mail_service = providers.Singleton(
+        MailService,
+        app.provided.config['MAIL']['HOST'],
+        app.provided.config['MAIL']['PORT'],
+        app.provided.config['MAIL']['USER'],
+        app.provided.config['MAIL']['PASSWORD'],
+        app.provided.config['MAIL']['SSL'],
+        app.provided.config['MAIL']['TLS'],
+        app.provided.config['MAIL']['FROM_NAME'],
+        app.provided.config['MAIL']['FROM_ADDR'],
+    )
+
+    user_repo = providers.Singleton(
+        UserRepo
+    )
 
     hash_service = providers.Singleton(
         HashService
@@ -31,19 +49,33 @@ class Container(containers.DeclarativeContainer):
 
     uid_service = providers.Singleton(
         UidService,
-        app.provided.config['UID']['LENGTH']
-    )
-
-    user_repo = providers.Singleton(
-        UserRepo,
-        hash_service,
-        uid_service
+        user_repo,
+        app.provided.config['USER']['UID_LENGTH']
     )
 
     auth_service = providers.Resource(
         AuthService,
         app,
         user_repo,
+        hash_service
+    )
+
+    token_service = providers.Resource(
+        TokenService,
+        app.provided.config['SECRET_KEY']
+    )
+
+    pswd_reset_service = providers.Resource(
+        PswdResetService,
+        token_service,
+        user_repo,
+        app.provided.config['USER']['PSWD_RESET_EXP']
+    )
+
+    user_service = providers.Singleton(
+        UserService,
+        user_repo,
+        uid_service,
         hash_service
     )
 
@@ -70,8 +102,7 @@ def before_first_request(container: Container = Provide[Container]):
 
 @inject
 def before_request(container: Container = Provide[Container]):
-    # setup the request instance
-    container.request.init()
+    pass
 
 
 @inject

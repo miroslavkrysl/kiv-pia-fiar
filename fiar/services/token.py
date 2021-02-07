@@ -3,7 +3,7 @@ from typing import Optional
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 
-class TimedTokenService:
+class TokenService:
     """
     Creating and verifying of time-based signed tokens.
     """
