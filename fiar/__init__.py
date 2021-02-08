@@ -5,8 +5,4 @@ from fiar.di import create_container
 
 # create app and app di container
 app = create_app()
-container = create_container(app)
-
-
-# wire all di dependencies
-container.wire(packages=[sys.modules[__name__]])
+container = create_container(app, __name__)
