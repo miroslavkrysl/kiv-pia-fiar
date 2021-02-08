@@ -3,11 +3,11 @@ from dependency_injector.wiring import inject, Provide
 from flask import Flask
 from flask.cli import with_appcontext
 import passlib.totp
-from pony.orm import Database, db_session
 
+from fiar.db import Db
 from fiar.di import Container
-from fiar.repositories.user import UserRepo
-from fiar.utils import load_config, store_config
+from fiar.services.user import UserService
+from fiar.utils import load_config, store_config, with_request_context
 
 
 def register_commands(app: Flask):
@@ -40,30 +40,34 @@ def key_generate(app: Flask = Provide[Container.app]):
 @click.command('db:drop')
 @with_appcontext
 @inject
-def db_drop_command(db: Database = Provide[Container.db]):
-    db.drop_all_tables()
+def db_drop_command(db: Db = Provide[Container.db]):
+    db.database.drop_all_tables(with_all_data=True)
     click.echo('All app related database tables dropped.')
 
 
 @click.command('db:init')
 @with_appcontext
 @inject
-def db_init_command(db: Database = Provide[Container.db]):
-    db.create_tables()
+def db_init_command(db: Db = Provide[Container.db]):
+    db.database.create_tables()
     click.echo('All database tables created.')
 
 
 @click.command('db:fill')
 @with_appcontext
+@with_request_context
 @inject
-def db_fill_command(user_repo: UserRepo = Provide[Container.user_repo]):
-    with db_session():
-        user_repo.create('hello',
-                         'hello@example.com',
-                         'password')
+def db_fill_command(user_service: UserService = Provide[Container.user_service]):
+    user_service.create_user(username='hello',
+                             email='hello@example.com',
+                             password='password')
 
-        user_repo.create("jello",
-                         "jello@example.com",
-                         "password")
+    user_service.create_user(username="jello",
+                             email="jello@example.com",
+                             password="password")
 
-        click.echo('Database filled with example data.')
+    user_service.create_user(username="mkrysl",
+                             email="mkrysl@protonmail.com",
+                             password="password")
+
+    click.echo('Database filled with example data.')

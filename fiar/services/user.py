@@ -1,7 +1,4 @@
 from datetime import datetime
-from typing import Optional
-
-from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from fiar.db import User
 from fiar.repositories.user import UserRepo
@@ -55,7 +52,7 @@ class UserService:
             user['is_admin'] = False
 
         if 'last_active_at' not in user:
-            user['last_active_at'] = datetime.min()
+            user['last_active_at'] = datetime.min
 
         return self.user_repo.add(**user)
 

@@ -15,6 +15,7 @@ fi
 
 # initialize db
 export FLASK_APP=fiar
-flask init-db
+flask db:init
+flask db:fill
 
 gunicorn --worker-class eventlet -w 1 'fiar:app'

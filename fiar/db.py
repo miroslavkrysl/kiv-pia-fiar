@@ -137,14 +137,15 @@ class Db:
         self.database = database
         self.session = None
 
-        app.before_request(self._enter_session)
-        app.teardown_appcontext(lambda e: self._exit_session(e))
+        app.before_request(self.enter_session)
+        app.teardown_appcontext(lambda e: self.exit_session(e))
 
-    def _enter_session(self):
-        self.session = db_session()
-        self.session.__enter__()
+    def enter_session(self):
+        if self.session is None:
+            self.session = db_session()
+            self.session.__enter__()
 
-    def _exit_session(self, exc):
-        if self.session:
+    def exit_session(self, exc):
+        if self.session is not None:
             self.session.__exit__(exc=exc)
             self.session = None
