@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask
+from flask import Flask, g
 from pony.orm import *
 
 database = Database()
@@ -125,6 +125,9 @@ class User(database.Entity):
 
 
 class Db:
+    G_PREFIX = 'db_'
+    G_SESSION = G_PREFIX + 'session'
+
     def __init__(self, app: Flask):
         db_config = app.config['DATABASE']
         database.bind(provider=db_config['PROVIDER'],
@@ -135,17 +138,18 @@ class Db:
         database.generate_mapping(check_tables=False)
 
         self.database = database
-        self.session = None
 
         app.before_request(self.enter_session)
         app.teardown_appcontext(lambda e: self.exit_session(e))
 
     def enter_session(self):
-        if self.session is None:
-            self.session = db_session()
-            self.session.__enter__()
+        if not hasattr(g, self.G_SESSION):
+            session = db_session()
+            session.__enter__()
+            setattr(g, self.G_SESSION, session)
 
     def exit_session(self, exc):
-        if self.session is not None:
-            self.session.__exit__(exc=exc)
-            self.session = None
+        if hasattr(g, self.G_SESSION):
+            session = getattr(g, self.G_SESSION)
+            session.__exit__(exc=exc)
+            delattr(g, self.G_SESSION)
