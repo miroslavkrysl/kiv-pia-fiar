@@ -16,7 +16,7 @@ class AuthService:
 
     SESSION_UID_NAME = 'user_uid'
     G_PREFIX = 'auth_'
-    G_USER_NAME = 'user'
+    G_USER = G_PREFIX + 'user'
 
     def __init__(self, app: Flask, user_repo: UserRepo, hash_service: HashService):
         self.user_repo = user_repo
@@ -24,7 +24,7 @@ class AuthService:
 
         @app.before_request
         def auth():
-            self._load_user()
+            self.load_user()
 
     def auth_email_password(self, email: str, password: str) -> Optional[User]:
         """
@@ -72,9 +72,9 @@ class AuthService:
         """
         return self._get_user() is not None
 
-    def _load_user(self):
+    def load_user(self):
         # setup auth global var
-        setattr(g, self.G_PREFIX + self.G_USER_NAME, {})
+        setattr(g, self.G_USER, {})
 
         # load user
         user_uid = session.get(self.SESSION_UID_NAME)
@@ -91,9 +91,9 @@ class AuthService:
         self._set_user(user)
 
     def _set_user(self, user: Optional[User]):
-        setattr(g, self.G_PREFIX + self.G_USER_NAME, user)
+        setattr(g, self.G_USER, user)
 
     def _get_user(self) -> User:
-        return getattr(g, self.G_PREFIX + self.G_USER_NAME)
+        return getattr(g, self.G_USER)
 
 

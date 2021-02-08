@@ -1,13 +1,15 @@
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, render_template, jsonify, request, abort, url_for
 from flask.views import MethodView
+from flask_socketio import Namespace
 from marshmallow import ValidationError
 
+from fiar.db import User
 from fiar.di import Container
 from fiar.repositories.user import UserRepo
+from fiar.routes.decorators import socket_auth_user, socket_context
 from fiar.schemas import user_login_schema, user_schema, user_pswd_reset_schema, user_pswd_reset_email_schema
 from fiar.services.auth import AuthService
-from fiar.services.hash import HashService
 from fiar.services.mail import MailService
 from fiar.services.pswd_reset import PswdResetService
 from fiar.services.user import UserService
@@ -44,6 +46,25 @@ def password_reset(token: str,
         return render_template('user/password_reset.html', token=token)
     else:
         abort(401, description="Expired or invalid password reset token")
+
+
+# --- Socket ---
+
+class UserSocket(Namespace):
+    def on_connect(self):
+        print('connected')
+
+    def on_disconnect(self):
+        print('disconnected')
+
+    @socket_context
+    @socket_auth_user
+    @inject
+    def on_active(self,
+                  data,
+                  auth_user: User,
+                  user_service: UserService = Provide[Container.user_service]):
+        user_service.update_last_active_at(auth_user)
 
 
 # --- REST ---

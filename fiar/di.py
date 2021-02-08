@@ -1,8 +1,11 @@
+import sys
+
 from dependency_injector import containers, providers
 from dependency_injector.wiring import inject, Provide
 from flask import Flask, request
 from flask_socketio import SocketIO
 
+from fiar import cli, db, routes
 from fiar.db import Db
 from fiar.repositories.user import UserRepo
 from fiar.services.auth import AuthService
@@ -21,11 +24,6 @@ class Container(containers.DeclarativeContainer):
 
     db = providers.Resource(Db,
                             app)
-
-    socket_io = providers.Singleton(
-        SocketIO,
-        app
-    )
 
     mail_service = providers.Singleton(
         MailService,
@@ -80,7 +78,7 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-def create_container(app: Flask):
+def create_container(app: Flask, name: str):
     container = Container(app=app)
     app: Flask = container.app()
 
@@ -91,6 +89,13 @@ def create_container(app: Flask):
     app.before_first_request(before_first_request)
     app.before_request(before_request)
     app.teardown_appcontext(teardown_appcontext)
+
+    # wire all di dependencies
+    container.wire(packages=[
+        routes
+    ], modules=[
+        cli
+    ])
 
     return container
 

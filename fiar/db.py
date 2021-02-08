@@ -148,7 +148,7 @@ class Db:
             session.__enter__()
             setattr(g, self.G_SESSION, session)
 
-    def exit_session(self, exc):
+    def exit_session(self, exc=None):
         if hasattr(g, self.G_SESSION):
             session = getattr(g, self.G_SESSION)
             session.__exit__(exc=exc)
