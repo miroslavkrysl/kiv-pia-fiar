@@ -26,6 +26,7 @@ eventlet = "*"
 # wsgi server
 gunicorn = "*"
 pony = "*"
+wrapt = "*"
 
 [dev-packages]
 

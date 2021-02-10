@@ -1,0 +1,3 @@
+LOBBY_NAMESPACE = '/lobby'
+GAME_NAMESPACE = '/game'
+USER_NAMESPACE = '/user'

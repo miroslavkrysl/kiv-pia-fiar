@@ -1,0 +1,19 @@
+{% for friendship in friendships %}
+    <tr>
+        <td>{{ friendship.recipient.username }}</td>
+        <td>
+            {% if friendship.recipient.is_online(config['USER']['ONLINE_TIMEOUT']) %}
+                <span class="text-success">online</span>
+            {% else %}
+                <span class="text-danger">offline</span>
+            {% endif %}
+        </td>
+        <td class="text-end">
+            <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ friendship.id }}">Unfriend</a>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="3" class="text-center">You have no friends</td>
+    </tr>
+{% endfor %}

@@ -1,0 +1,20 @@
+{% for player in players if
+        g.auth_user != player
+        and player.is_online(config['USER']['ONLINE_TIMEOUT'])
+        and not player.is_friend %}
+    <tr>
+        <td>{{ player.username }}</td>
+        <td>
+            <span class="text-success">online</span>
+        </td>
+        <td class="text-end">
+            {% if not player.friendship_requested %}
+                <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ player.id }}">Add friend</a>
+            {% endif %}
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="3" class="text-center">No other online players</td>
+    </tr>
+{% endfor %}

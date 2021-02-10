@@ -1,4 +1,4 @@
-from flask import render_template, Flask, request, jsonify
+from flask import render_template, Flask, request
 from werkzeug.exceptions import HTTPException
 
 

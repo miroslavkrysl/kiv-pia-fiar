@@ -2,6 +2,7 @@ let gulp = require('gulp');
 let clean = require('gulp-clean');
 let merge = require('merge-stream');
 let sass = require('gulp-sass');
+let rename = require("gulp-rename");
 sass.compiler = require('node-sass');
 
 gulp.task('compile:css', function () {
@@ -25,10 +26,20 @@ gulp.task('libs', function () {
     return merge(
         gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css'),
         gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css.map'),
-        gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.js'),
+        gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js'),
+        gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map'),
+
         gulp.src('node_modules/jquery/dist/jquery.min.js'),
-        gulp.src('node_modules/socket.io/client-dist/socket.io.js'),
+        gulp.src('node_modules/jquery/dist/jquery.min.map'),
+
+        gulp.src('node_modules/socket.io/client-dist/socket.io.min.js'),
+        gulp.src('node_modules/socket.io/client-dist/socket.io.min.js.map'),
+
         gulp.src('node_modules/zxcvbn/dist/zxcvbn.js'),
+        gulp.src('node_modules/zxcvbn/dist/zxcvbn.js.map'),
+
+        gulp.src('node_modules/@fortawesome/fontawesome-free/js/all.min.js')
+            .pipe(rename('font-awesome.min.js')),
     ).pipe(gulp.dest('fiar/static/lib'));
 });
 

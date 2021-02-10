@@ -4,8 +4,9 @@ from flask import Flask
 from flask.cli import with_appcontext
 import passlib.totp
 
-from fiar.db import Db
 from fiar.di import Container
+from fiar.repositories.user import UserRepo
+from fiar.services.db import Db
 from fiar.services.user import UserService
 from fiar.utils import load_config, store_config, with_request_context
 
@@ -57,17 +58,18 @@ def db_init_command(db: Db = Provide[Container.db]):
 @with_appcontext
 @with_request_context
 @inject
-def db_fill_command(user_service: UserService = Provide[Container.user_service]):
-    user_service.create_user(username='hello',
-                             email='hello@example.com',
-                             password='password')
+def db_fill_command(user_service: UserService = Provide[Container.user_service],
+                    user_repo: UserRepo = Provide[Container.user_repo]):
+    user_repo.create(**user_service.init_user(username='hello',
+                                              email='hello@example.com',
+                                              password='password'))
 
-    user_service.create_user(username="jello",
-                             email="jello@example.com",
-                             password="password")
+    user_repo.create(**user_service.init_user(username="jello",
+                                              email="jello@example.com",
+                                              password="password"))
 
-    user_service.create_user(username="mkrysl",
-                             email="mkrysl@protonmail.com",
-                             password="password")
+    user_repo.create(**user_service.init_user(username="mkrysl",
+                                              email="mkrysl@protonmail.com",
+                                              password="password"))
 
     click.echo('Database filled with example data.')

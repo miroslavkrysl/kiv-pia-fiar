@@ -1,0 +1,23 @@
+{% for request in requests %}
+    <tr>
+        <td>
+            {% if request.sender == g.auth_user %}
+                {{ request.recipient.username }}
+            {% else %}
+                {{ request.sender.username }}
+            {% endif %}
+        </td>
+        <td class="text-end">
+            {% if request.sender == g.auth_user %}
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ request.id }}">Remove</a>
+            {% else %}
+                <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ request.sender.id }}">Accept</a>
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ request.id }}">Decline</a>
+            {% endif %}
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="3" class="text-center">No requests</td>
+    </tr>
+{% endfor %}

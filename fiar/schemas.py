@@ -5,7 +5,7 @@ class UserSchema(Schema):
     id = fields.Int(dump_only=True)
     username = fields.Str(required=True, validate=[
         lambda x: x.isprintable(),
-        validate.Length(min=3, max=32)
+        validate.Length(min=3, max=16)
     ])
     email = fields.Email(required=True, validate=[
         validate.Length(max=255)
@@ -24,15 +24,21 @@ class UserSchema(Schema):
 user_schema = UserSchema()
 
 user_login_schema = UserSchema(only=[
-        'email',
-        'password'
+    'email',
+    'password'
 ])
 
-user_pswd_reset_schema = UserSchema(only=[
-        'password'
+user_password_schema = UserSchema(only=[
+    'password'
+])
+
+user_email_schema = UserSchema(only=[
+    'email'
 ])
 
 
-user_pswd_reset_email_schema = UserSchema(only=[
-        'email'
-])
+class IdSchema(Schema):
+    id = fields.Int()
+
+
+id_schema = IdSchema()

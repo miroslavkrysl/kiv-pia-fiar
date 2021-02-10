@@ -37,11 +37,11 @@ class UserService:
         last_active_at = last_active_at if last_active_at is not None else datetime.now()
         user.last_active_at = last_active_at
 
-    def create_user(self, **kwargs) -> User:
+    def init_user(self, **kwargs) -> dict:
         """
-        Create a new user from given dict and save him.
+        Initialize dict fields for creating a new user from the given dict.
         :param kwargs: The user named fields values.
-        :return: The created user.
+        :return: New dict with all required and initialized fields.
         """
         user = dict(kwargs)
 
@@ -51,10 +51,13 @@ class UserService:
         if 'is_admin' not in user:
             user['is_admin'] = False
 
+        if 'last_playing_at' not in user:
+            user['last_playing_at'] = datetime.min
+
         if 'last_active_at' not in user:
             user['last_active_at'] = datetime.min
 
-        return self.user_repo.add(**user)
+        return user
 
     def change_uid(self, user: User):
         """

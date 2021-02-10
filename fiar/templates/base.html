@@ -11,39 +11,61 @@
 {# Dummy script to prevent loading scripts before stylesheets #}
 <script>0</script>
 
+<header class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm p-3 px-md-4 mb-4 bg-light">
+    <div class="container">
+        <a class="navbar-brand me-auto" href="{{ url_for('lobby.index') }}">FIAR - Five in a Row</a>
+        <ul class="navbar-nav">
+            {% if g.auth_user %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('lobby.index') }}">Lobby</a>
+                </li>
+                <li class="dropdown ms-2">
+                    <a type="button" href="#" class="btn btn-outline-primary dropdown-toggle" id="user-menu-btn"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        {{ g.auth_user.username }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="user-menu-btn">
+                        <li><a class="dropdown-item" href="#">Change password</a></li>
+                        <li><a class="dropdown-item" href="#" id="logout">Logout</a></li>
+                    </ul>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="btn btn-primary me-2" href="{{ url_for('user.login') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-outline-primary" href="{{ url_for('user.register') }}">Register</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</header>
+
+<div class="container" id="message-box">
+    <template id="message-template">
+        <div class="alert"></div>
+    </template>
+</div>
+
+{% block content %}{% endblock %}
+
+{# --- SCRIPTS --- #}
+
 <script type=text/javascript>
     // set script uri root for ajax calls
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 </script>
 
 <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/bootstrap.bundle.js') }}"></script>
-<script src="{{ url_for('static', filename='lib/socket.io.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/font-awesome.min.js') }}"></script>
+<script src="{{ url_for('static', filename='lib/socket.io.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/zxcvbn.js') }}"></script>
 
-<header class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm p-3 px-md-4 mb-4 bg-light">
-    <div class="container">
-        <a class="navbar-brand me-auto" href="{{ url_for('lobby.index') }}">FIAR - Five in a Row</a>
 
-        {% if g.auth_user %}
-            <div class="dropdown">
-                <button type="button" class="btn btn-outline-primary dropdown-toggle" id="user-menu-btn"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    {{ g.auth_user.username }}
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="user-menu-btn">
-                    <li><a class="dropdown-item" href="#">Change password</a></li>
-                    <li><a class="dropdown-item" href="#" id="logout">Logout</a></li>
-                </ul>
-            </div>
-        {% else %}
-            <a class="btn btn-primary me-2" href="{{ url_for('user.login') }}">Login</a>
-            <a class="btn btn-outline-primary" href="{{ url_for('user.register') }}">Register</a>
-        {% endif %}
-    </div>
-</header>
-
-{% block content %}{% endblock %}
+{# Message box script #}
+<script>
+</script>
 
 {# Logout script #}
 <script>
@@ -60,11 +82,6 @@
         });
     });
 </script>
-
-{# user socket #}
-{% if g.auth_user %}
-    <script src="{{ url_for('static', filename='js/user_socket.js') }}"></script>
-{% endif %}
 
 {% block scripts %}{% endblock %}
 

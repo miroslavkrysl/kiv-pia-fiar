@@ -33,12 +33,12 @@ class UserRepo:
         users = User.select().order_by(order)
         return users
 
-    def get_all_online(self, max_inactive_time: timedelta) -> Iterable[User]:
+    def get_all_online(self, max_inactive_time: int) -> Iterable[User]:
         now = datetime.now()
-        threshold = now - max_inactive_time
+        threshold = now - timedelta(seconds=max_inactive_time)
         return User.select(lambda p: p.last_active_at > threshold)
 
-    def add(self, **kwargs) -> User:
+    def create(self, **kwargs) -> User:
         user = User(**kwargs)
         user.flush()
 

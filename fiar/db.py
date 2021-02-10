@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import IntEnum
 
 from pony.orm import *
@@ -13,9 +13,9 @@ class Player(IntEnum):
 
 class User(database.Entity):
     id = PrimaryKey(int, auto=True)
-    username = Required(str, 32, unique=True)
+    username = Required(str, 16, unique=True)
     email = Required(str, 255, unique=True)
-    password = Required(str, 60)
+    password = Required(str, 84)
     is_admin = Required(bool)
     uid = Required(str, 128, unique=True)
     last_active_at = Required(datetime)
@@ -29,6 +29,11 @@ class User(database.Entity):
     received_friendships = Set('Friendship', reverse='recipient')
     games_as_o = Set('Game', reverse='player_o')
     games_as_x = Set('Game', reverse='player_x')
+
+    def is_online(self, max_inactive_time: int):
+        now = datetime.now()
+        threshold = now - timedelta(seconds=max_inactive_time)
+        return self.last_active_at > threshold
 
 
 class Game(database.Entity):
@@ -71,3 +76,8 @@ class Friendship(database.Entity):
     recipient = Required(User, reverse='received_friendships')
 
     composite_key(sender, recipient)
+
+    def before_delete(self):
+        fs = Friendship.get(sender=self.recipient, recipient=self.sender)
+        if fs:
+            fs.delete()

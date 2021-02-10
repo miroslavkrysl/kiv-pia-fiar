@@ -1,11 +1,14 @@
-from functools import wraps
+from functools import partial, wraps
+
+import wrapt
+import inspect
 
 from dependency_injector.wiring import inject, Provide
-from flask import url_for, redirect, g, request, jsonify, abort
+from flask import url_for, redirect, abort
 from flask_socketio import disconnect
 
-from fiar.db import Db
 from fiar.di import Container
+from fiar.services.db import Db
 from fiar.services.auth import AuthService
 
 
@@ -21,28 +24,32 @@ def _is_admin(auth_service: AuthService = Provide[Container.auth_service]):
     return auth_service.get_user().is_admin
 
 
-def auth_user(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
+def auth_user(require_auth=True):
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
         user = _authenticated_user()
-        if user is None:
+
+        if user is None and require_auth:
             return redirect(url_for('user.login'))
         else:
-            return f(*args, auth_user=user, **kwargs)
+            if 'auth' in inspect.signature(wrapped).parameters:
+                return wrapped(*args, auth=user, **kwargs)
+            else:
+                return wrapped(*args, **kwargs)
 
-    return decorated_function
+    return wrapper
 
 
 def admin_only(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         if not _is_admin():
             description = "You must be an admin to access this area"
             abort(403, description=description)
 
         return f(*args, **kwargs)
 
-    return decorated_function
+    return wrapper
 
 
 def socket_context(f):
@@ -56,22 +63,26 @@ def socket_context(f):
     def _after(database: Db = Provide[Container.db]):
         database.exit_session()
 
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
         _before()
-        f(*args, **kwargs)
+        wrapped(*args, **kwargs)
         _after()
 
-    return decorated_function
+    return wrapper(f)
 
 
-def socket_auth_user(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
+def socket_auth_user(require_auth=True):
+    @wrapt.decorator
+    def wrapper(wrapped, instance, args, kwargs):
         user = _authenticated_user()
-        if user is None:
+
+        if user is None and require_auth:
             disconnect()
         else:
-            return f(*args, auth_user=user, **kwargs)
+            if 'auth' in inspect.signature(wrapped).parameters:
+                wrapped(*args, auth=user, **kwargs)
+            else:
+                wrapped(*args, **kwargs)
 
-    return decorated_function
+    return wrapper

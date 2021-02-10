@@ -8,7 +8,7 @@ from fiar.db import User
 from fiar.di import Container
 from fiar.repositories.user import UserRepo
 from fiar.routes.decorators import socket_auth_user, socket_context
-from fiar.schemas import user_login_schema, user_schema, user_pswd_reset_schema, user_pswd_reset_email_schema
+from fiar.schemas import user_login_schema, user_schema, user_password_schema, user_email_schema
 from fiar.services.auth import AuthService
 from fiar.services.mail import MailService
 from fiar.services.pswd_reset import PswdResetService
@@ -51,20 +51,14 @@ def password_reset(token: str,
 # --- Socket ---
 
 class UserSocket(Namespace):
-    def on_connect(self):
-        print('connected')
-
-    def on_disconnect(self):
-        print('disconnected')
-
     @socket_context
-    @socket_auth_user
+    @socket_auth_user()
     @inject
     def on_active(self,
                   data,
-                  auth_user: User,
+                  auth: User,
                   user_service: UserService = Provide[Container.user_service]):
-        user_service.update_last_active_at(auth_user)
+        user_service.update_last_active_at(auth)
 
 
 # --- REST ---
@@ -90,7 +84,8 @@ class RegisterApi(MethodView):
         if errors:
             return jsonify({"errors": errors}), 400
 
-        user = user_service.create_user(**data)
+        user = user_service.init_user(**data)
+        user = user_repo.create(**user)
         auth_service.login(user)
 
         return jsonify(user_schema.dump(user)), 201
@@ -130,7 +125,7 @@ class PswdResetEmailApi(MethodView):
              pswd_reset_service: PswdResetService = Provide[Container.pswd_reset_service],
              mail_service: MailService = Provide[Container.mail_service]):
         try:
-            data = user_pswd_reset_email_schema.load(request.form)
+            data = user_email_schema.load(request.form)
         except ValidationError as err:
             return jsonify({"errors": err.messages}), 400
 
@@ -143,7 +138,7 @@ class PswdResetEmailApi(MethodView):
         url = url_for('user.password_reset', token=token, _external=True)
         mail_service.send("Password reset", user.email, render_template('mail/pswd_reset.html', url=url))
 
-        return jsonify(), 201
+        return jsonify(), 202
 
 
 class PswdResetApi(MethodView):
@@ -153,7 +148,7 @@ class PswdResetApi(MethodView):
             user_service: UserService = Provide[Container.user_service],
             pswd_reset_service: PswdResetService = Provide[Container.pswd_reset_service]):
         try:
-            data = user_pswd_reset_schema.load(request.form)
+            data = user_password_schema.load(request.form)
         except ValidationError as err:
             return jsonify({"errors": err.messages}), 400
 

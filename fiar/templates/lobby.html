@@ -3,8 +3,150 @@
 {% block title %}Hello world title{% endblock %}
 
 {% block content %}
-    <h1>Users:</h1>
-    {% for user in users %}
-        <p>{{ user.username }}</p>
-    {% endfor %}
+    <div class="container-md">
+        <div class="row">
+            <div class="col-lg">
+                <h2 class="mx-auto">Friendship requests</h2>
+                <table class="table table-borderless table-striped align-middle" id="friendship-requests-table">
+                    <tbody></tbody>
+                </table>
+                <h2 class="mx-auto">Friends</h2>
+                <table class="table table-borderless table-striped" id="friends-table">
+                    <tbody></tbody>
+                </table>
+                <h2 class="mx-auto">Online players</h2>
+                <table class="table table-borderless table-striped" id="players-table">
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="col-lg">
+                <h2 class="mx-auto">Games</h2>
+                <table class="table table-bordered">
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let lobby_socket = io('/lobby');
+
+        // --- REST calls ---
+
+        function add_friend_request(friend_id) {
+            $.ajax({
+                url: '{{ url_for('friendship.request_api') }}',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: friend_id
+                }
+            });
+        }
+
+        function remove_friend_request(id) {
+            $.ajax({
+                url: '{{ url_for('friendship.request_api') }}' + id,
+                type: 'delete',
+                dataType: 'json'
+            });
+        }
+
+        function add_friendship(friend_id) {
+            $.ajax({
+                url: '{{ url_for('friendship.friendship_api') }}',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: friend_id
+                }
+            });
+        }
+
+
+        function remove_friendship(id) {
+            $.ajax({
+                url: '{{ url_for('friendship.friendship_api') }}' + id,
+                type: 'delete',
+                dataType: 'json'
+            });
+        }
+
+        // --- AJAX loads ---
+
+        function load_friends() {
+            let table = $("#friends-table");
+
+            table.find("tbody").load("{{ url_for('lobby.friends_rows') }}", function () {
+                table.find("[data-btn-unfriend]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    remove_friendship(id);
+                });
+            });
+        }
+
+        function load_players() {
+            let table = $("#players-table");
+
+            table.find("tbody").load("{{ url_for('lobby.players_rows') }}", function () {
+                table.find("[data-btn-friend]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    add_friend_request(id);
+                });
+            });
+        }
+
+        function load_requests() {
+            let table = $("#friendship-requests-table");
+
+            table.find("tbody").load("{{ url_for('lobby.friendship_requests_rows') }}", function () {
+                table.find("[data-btn-accept]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    add_friendship(id);
+                });
+                table.find("[data-btn-decline]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    remove_friend_request(id);
+                });
+            });
+        }
+
+        // --- Socket ---
+
+        lobby_socket.on('new_request', function () {
+            load_requests();
+            load_players();
+        });
+
+        lobby_socket.on('request_refused', function () {
+            load_requests();
+            load_players();
+        });
+
+        lobby_socket.on('new_friend', function () {
+            load_requests();
+            load_friends();
+            load_players();
+        });
+
+        lobby_socket.on('friend_removed', function () {
+            load_players();
+            load_friends();
+        });
+
+        $(document).ready(function (event) {
+            load_friends();
+            load_players();
+            load_requests();
+
+            setInterval(function () {
+                load_friends();
+                load_players();
+            }, 5000);
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/user_socket.js') }}"></script>
 {% endblock %}
