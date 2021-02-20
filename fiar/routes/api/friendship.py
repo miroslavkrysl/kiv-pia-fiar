@@ -1,6 +1,5 @@
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, jsonify
-from flask_socketio import emit
 from marshmallow import fields
 
 from fiar.data.models import User
@@ -10,7 +9,6 @@ from fiar.data.repositories.user import UserRepo
 from fiar.data.schemas import user_schema, UserSchema
 from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user
-from fiar.routes.socket import LOBBY_NAMESPACE
 from fiar.services.friendship import FriendshipService
 from fiar.services.user import UserService
 
@@ -79,127 +77,77 @@ def put_friendship(id: int,
 
     if friend is None:
         return jsonify({'error': f'User with id {id} does not exist'}), 400
-    elif friendship_service.is_request_pending(auth, friend):
-        return jsonify({'error': 'Already requested'}), 400
-    elif friendship_service.are_friends(auth, friend):
+
+    if friendship_service.are_friends(auth, friend):
         return jsonify(), 200
 
-    friendship_service.make_friendship(auth, friend)
+    if not friendship_service.has_received_request(auth, friend):
+        return jsonify({'error': 'Friendship not requested from the other user.'}), 409
 
-    emit('new_request', namespace=LOBBY_NAMESPACE, to=auth.id)
-    emit('new_request', namespace=LOBBY_NAMESPACE, to=friend.id)
+    friendship_service.accept_friendship(auth, friend)
 
     return jsonify(), 201
 
-# @auth_user()
-# @inject
-# def delete(self,
-#            id: int,
-#            auth: User,
-#            friendship_request_repo: FriendshipRequestRepo = Provide[Container.friendship_request_repo]):
-#     req = friendship_request_repo.get_by_id(id)
-#
-#     if req is None:
-#         return jsonify({'error': 'Request does not exist'}), 400
-#     elif req.sender != auth and req.recipient != auth:
-#         return jsonify({'error': 'Request is not about you'}), 403
-#
-#     req.delete()
-#
-#     emit('request_refused', namespace=LOBBY_NAMESPACE, to=req.sender.id)
-#     emit('request_refused', namespace=LOBBY_NAMESPACE, to=req.recipient.id)
-#
-#     return jsonify(), 200
-#
-#
-# request_api = FriendshipRequestApi.as_view('request_api')
-# bp.add_url_rule('/request/', view_func=request_api, methods=['POST'])
-# bp.add_url_rule('/api/request/<int:id>', view_func=request_api, methods=['DELETE'])
-#
-#
-# class FriendshipApi(MethodView):
-#     @auth_user()
-#     @inject
-#     def post(self,
-#              auth: User,
-#              user_repo: UserRepo = Provide[Container.user_repo],
-#              friendship_repo: FriendshipRepo = Provide[Container.friendship_repo],
-#              friendship_request_repo: FriendshipRequestRepo = Provide[Container.friendship_request_repo]):
-#         try:
-#             data = id_schema.load(request.form)
-#         except ValidationError as err:
-#             return jsonify({"errors": err.messages}), 400
-#
-#         errors = {}
-#         error = None
-#
-#         friend = user_repo.get_by_id(data['id'])
-#
-#         if friend is None:
-#             errors['id'] = ['User does not exist']
-#         else:
-#             req = friendship_request_repo.get_by_users(friend, auth)
-#
-#         if friendship_repo.get_by_users(auth, friend) is not None:
-#             error = 'Already friends'
-#         elif request is None:
-#             error = 'Friendship not requested'
-#
-#         if errors:
-#             return jsonify({'errors': errors}), 400
-#         elif error:
-#             return jsonify({'error': error}), 400
-#
-#         req.delete()
-#         friendship_repo.create(auth, friend)
-#
-#         emit('new_friend', namespace=LOBBY_NAMESPACE, to=friend.id)
-#         emit('new_friend', namespace=LOBBY_NAMESPACE, to=auth.id)
-#
-#         return jsonify(), 201
-#
-#     @auth_user()
-#     @inject
-#     def delete(self,
-#                id: int,
-#                auth: User,
-#                friendship_repo: FriendshipRepo = Provide[Container.friendship_repo]):
-#         fs = friendship_repo.get_by_id(id)
-#
-#         if fs is None:
-#             return jsonify({'error': 'Friendship does not exist'}), 400
-#         elif fs.sender != auth and fs.recipient != auth:
-#             return jsonify({'error': 'Friendship is not about you'}), 403
-#
-#         fs.delete()
-#
-#         emit('friend_removed', namespace=LOBBY_NAMESPACE, to=fs.sender.id)
-#         emit('friend_removed', namespace=LOBBY_NAMESPACE, to=fs.recipient.id)
-#
-#         return jsonify(), 200
-#
-#
-# friendship_api = FriendshipApi.as_view('friendship_api')
-# bp.add_url_rule('/api/friendship/', view_func=friendship_api, methods=['POST'])
-# bp.add_url_rule('/api/friendship/<int:id>', view_func=friendship_api, methods=['DELETE'])
-#
-#
-#
-#
-# @bp.route('/ajax/friends_rows')
-# @auth_user()
-# @inject
-# def friends_rows(auth: User,
-#                  friendship_repo: FriendshipRepo = Provide[Container.friendship_repo]):
-#     friendships = friendship_repo.get_all_of(auth)
-#     return render_template('ajax/friends_rows.html', friendships=friendships)
-#
-#
-# @bp.route('/ajax/friendship_requests_rows')
-# @auth_user()
-# @inject
-# def friendship_requests_rows(auth: User,
-#                              friendship_request_repo: FriendshipRequestRepo = Provide[
-#                                  Container.friendship_request_repo]):
-#     requests = friendship_request_repo.get_all_of(auth)
-#     return render_template('ajax/friendship_requests_rows.html', requests=requests)
+
+@bp.route('/friendship/<int:id>', methods=['DELETE'])
+@auth_user(RouteType.API)
+@inject
+def delete_friendship(id: int,
+                      auth: User,
+                      user_repo: UserRepo = Provide[AppContainer.user_repo],
+                      friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
+    friend = user_repo.get_by_id(id)
+
+    if friend is None:
+        return jsonify({'error': f'User with {id} does not exist'}), 404
+
+    if friendship_service.are_friends(auth, friend):
+        friendship_service.remove_friendship(auth, friend)
+
+    return jsonify(), 200
+
+
+# --- Friendship request ---
+
+@bp.route('/request/<int:id>', methods=['PUT'])
+@auth_user(RouteType.API)
+@inject
+def put_request(id: int,
+                auth: User,
+                user_repo: UserRepo = Provide[AppContainer.user_repo],
+                friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
+    friend = user_repo.get_by_id(id)
+
+    if friend is None:
+        return jsonify({'error': f'User with id {id} does not exist'}), 400
+
+    if friendship_service.has_received_request(auth, friend):
+        return jsonify({'error': 'Already requested from the other user'}), 409
+
+    if friendship_service.are_friends(auth, friend):
+        return jsonify({'error': 'Already friends'}), 409
+
+    if friendship_service.has_received_request(friend, auth):
+        return jsonify(), 200
+
+    friendship_service.accept_friendship(auth, friend)
+
+    return jsonify(), 201
+
+
+@bp.route('/request/<int:id>', methods=['DELETE'])
+@auth_user(RouteType.API)
+@inject
+def delete_request(id: int,
+                   auth: User,
+                   user_repo: UserRepo = Provide[AppContainer.user_repo],
+                   friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
+    friend = user_repo.get_by_id(id)
+
+    if friend is None:
+        return jsonify({'error': f'User with {id} does not exist'}), 404
+
+    if friendship_service.is_request_pending(auth, friend):
+        friendship_service.deny_friendship(auth, friend)
+
+    return jsonify(), 200
