@@ -29,7 +29,9 @@ game_table = Table(
     Column('id', Integer, primary_key=True),
     Column('player_o_id', Integer, ForeignKey('user.id'), nullable=False),
     Column('player_x_id', Integer, ForeignKey('user.id'), nullable=False),
-    Column('started_at', DateTime, nullable=False),
+    Column('player_o_last_active_at', DateTime),
+    Column('player_x_last_active_at', DateTime),
+    Column('created_at', DateTime, nullable=False),
     Column('ended_at', DateTime),
     Column('winner', Enum(Player))
 )
