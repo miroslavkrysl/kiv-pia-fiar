@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fiar.data.models import User
 from fiar.data.repositories.user import UserRepo
@@ -14,10 +14,12 @@ class UserService:
     def __init__(self,
                  user_repo: UserRepo,
                  uid_service: UidService,
-                 hash_service: HashService):
+                 hash_service: HashService,
+                 online_timeout: timedelta):
         self.user_repo = user_repo
         self.uid_service = uid_service
         self.hash_service = hash_service
+        self.online_timeout = online_timeout
 
     def change_password(self, user: User, password: str):
         """
@@ -68,3 +70,8 @@ class UserService:
 
     def email_exists(self, email: str) -> bool:
         return self.user_repo.get_by_email(email) is not None
+
+    def is_online(self, user: User) -> bool:
+        now = datetime.now()
+        threshold = now - self.online_timeout
+        return user.last_active_at > threshold

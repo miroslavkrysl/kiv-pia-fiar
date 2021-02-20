@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Flask
 
 from fiar.data.repositories.friendship import FriendshipRepo
@@ -97,7 +99,8 @@ class UserServiceProvider(ServiceProvider):
              user_repo: UserRepo,
              uid_service: UidService,
              hash_service: HashService) -> UserService:
-        return UserService(user_repo, uid_service, hash_service)
+        online_timeout = timedelta(seconds=app.config['USER']['ONLINE_TIMEOUT'])
+        return UserService(user_repo, uid_service, hash_service, online_timeout)
 
     def shutdown(self, resource: UserService) -> None:
         pass

@@ -14,10 +14,8 @@ class User:
     is_admin: bool = field(default=False)
     last_active_at: Optional[datetime] = field(default=None)
 
-    def is_online(self, max_inactive_time: timedelta):
-        now = datetime.now()
-        threshold = now - max_inactive_time
-        return self.last_active_at > threshold
+    def __eq__(self, o: object) -> bool:
+        return isinstance(o, self.__class__) and self.id == o.id
 
 
 class Player(Enum):

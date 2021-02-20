@@ -19,7 +19,6 @@ bp = Blueprint('user_api', __name__)
 
 
 class UserWithFriendshipSchema(UserSchema):
-    is_friend = fields.Boolean()
     is_request_pending = fields.Boolean()
 
 
@@ -35,9 +34,12 @@ def get_online_users(auth: User,
                      user_repo: UserRepo = Provide[AppContainer.user_repo],
                      friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
     users = user_repo.get_all_online(timedelta(seconds=current_app.config['USER']['ONLINE_TIMEOUT']))
+    users = list(filter(
+        lambda u: not friendship_service.are_friends(auth, u)
+                  and auth != u,
+        users))
 
     for user in users:
-        user.is_friend = friendship_service.are_friends(auth, user)
         user.is_request_pending = friendship_service.is_request_pending(auth, user)
 
     return jsonify(user_with_friendship_schema.dump(users, many=True))

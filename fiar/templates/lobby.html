@@ -14,8 +14,8 @@
                 <table class="table table-borderless table-striped" id="friends-table">
                     <tbody></tbody>
                 </table>
-                <h2 class="mx-auto">Online players</h2>
-                <table class="table table-borderless table-striped" id="players-table">
+                <h2 class="mx-auto">Online users</h2>
+                <table class="table table-borderless table-striped" id="users-table">
                     <tbody></tbody>
                 </table>
             </div>
@@ -27,6 +27,65 @@
             </div>
         </div>
     </div>
+
+    {#  User table templates  #}
+
+    {% raw %}
+    <script id="user-row-template" type="text/x-handlebars-template">
+        <tr>
+            <td>{{ username }}</td>
+            <td>
+                <span class="text-success">online</span>
+            </td>
+            <td class="text-end">
+                {{#unless is_request_pending }}
+                <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ id }}">Add friend</a>
+                {{/unless }}
+            </td>
+        </tr>
+    </script>
+    {% endraw %}
+
+    {% raw %}
+    <script id="user-row-empty-template" type="text/x-handlebars-template">
+        <tr>
+            <td colspan="3" class="text-center">No other online players</td>
+        </tr>
+    </script>
+    {% endraw %}
+
+
+    {#  Friend table templates  #}
+
+    {% raw %}
+    <script id="friend-row-template" type="text/x-handlebars-template">
+        <tr>
+            <td>{{ username }}</td>
+            <td>
+                {%#if is_online %}
+                <span class="text-success">online</span>
+                {{else}}
+                <span class="text-danger">offline</span>
+                {{/if}}
+            </td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ id }}">Unfriend</a>
+            </td>
+        </tr>
+    </script>
+    {% endraw %}
+
+    {% raw %}
+    <script id="friend-row-empty-template" type="text/x-handlebars-template">
+        <tr>
+            <td colspan="3" class="text-center">You have no friends</td>
+        </tr>
+    </script>
+    {% endraw %}
+
+
+    {#  Friend requests table templates  #}
+
 {% endblock %}
 
 {% block scripts %}
@@ -34,79 +93,149 @@
         let lobby_socket = io('/lobby');
 
         // --- REST calls ---
+        /*
+
+        function add_friend_request(friend_id) {
+            $.ajax({
+                {#url: '{{ url_for('friendship.request_api') }}',#}
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: friend_id
+                }
+            });
+        }
+
+        function remove_friend_request(id) {
+            $.ajax({
+                {#url: '{{ url_for('friendship.request_api') }}' + id,#}
+                type: 'delete',
+                dataType: 'json'
+            });
+        }
+
+        function add_friendship(friend_id) {
+            $.ajax({
+                {#url: '{{ url_for('friendship.friendship_api') }}',#}
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    id: friend_id
+                }
+            });
+        }
 
 
-        // --- AJAX loads ---
+        function remove_friendship(id) {
+            $.ajax({
+                {#url: '{{ url_for('friendship.friendship_api') }}' + id,#}
+                type: 'delete',
+                dataType: 'json'
+            });
+        }
+
+        */
+
+        // --- loads ---
+
+        let user_row_template = Handlebars.compile(document.getElementById("user-row-template").innerHTML);
+        let user_row_empty_template = Handlebars.compile(document.getElementById("user-row-empty-template").innerHTML);
+        let friend_row_template = Handlebars.compile(document.getElementById("friend-row-template").innerHTML);
+        let friend_row_empty_template = Handlebars.compile(document.getElementById("friend-row-empty-template").innerHTML);
 
         function load_friends() {
-            let table = $("#friends-table");
+            let tbody = $("#friends-table").find("tbody");
 
-            /*
-            table.find("tbody").load("{{ url_for('friendship_api.get_friends') }}", function () {
-                table.find("[data-btn-unfriend]").click(function (event) {
+            $.getJSON("{{ url_for('friendship_api.get_friends') }}", function (data) {
+                tbody.empty()
+
+                if (data.length === 0) {
+                    let html = friend_row_empty_template(null);
+                    tbody.append(html);
+                } else {
+                    $.each(data, function (key, friend) {
+                        let html = friend_row_template(friend);
+                        tbody.append(html);
+                    });
+                }
+
+                tbody.find("[data-btn-unfriend]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    remove_friendship(id);
+                    //remove_friendship(id);
                 });
-            });*/
+            });
         }
 
-        function load_players() {
-            let table = $("#players-table");
-            /*
-            table.find("tbody").load("{{ url_for('user_api.get_online_users') }}", function () {
-                table.find("[data-btn-friend]").click(function (event) {
+        function load_users() {
+            let tbody = $("#users-table").find("tbody");
+
+            $.getJSON("{{ url_for('user_api.get_online_users') }}", function (data) {
+                tbody.empty()
+
+                if (data.length === 0) {
+                    let html = user_row_empty_template(null);
+                    tbody.append(html);
+                } else {
+                    $.each(data, function (key, user) {
+                        let html = user_row_template(user);
+                        tbody.append(html);
+                    });
+                }
+
+                tbody.find("[data-btn-friend]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    add_friend_request(id);
+                    //add_friend_request(id);
                 });
-            });*/
+            });
         }
 
-        function load_requests() {
-            let table = $("#friendship-requests-table");
-            /*
-            table.find("tbody").load("{{ url_for('friendship_api.get_friends_requested') }}", function () {
-                table.find("[data-btn-accept]").click(function (event) {
-                    let id = $(this).attr('data-id');
-                    add_friendship(id);
-                });
-                table.find("[data-btn-decline]").click(function (event) {
-                    let id = $(this).attr('data-id');
-                    remove_friend_request(id);
-                });
-            });*/
-        }
+
+        {#function load_requests() {#}
+        {#    let table = $("#friendship-requests-table");#}
+        {##}
+        {#            table.find("tbody").load("{{ url_for('lobby.friendship_requests_rows') }}", function () {#}
+        {#                table.find("[data-btn-accept]").click(function (event) {#}
+        {#                    let id = $(this).attr('data-id');#}
+        {#                    add_friendship(id);#}
+        {#                });#}
+        {#                table.find("[data-btn-decline]").click(function (event) {#}
+        {#                    let id = $(this).attr('data-id');#}
+        {#                    remove_friend_request(id);#}
+        {#                });#}
+        {#            });#}
+        {#        }#}
 
         // --- Socket ---
 
         lobby_socket.on('new_request', function () {
-            load_requests();
-            load_players();
+            {#load_requests();#}
+            load_users();
         });
 
         lobby_socket.on('request_refused', function () {
-            load_requests();
-            load_players();
+            {#load_requests();#}
+            load_users();
         });
 
         lobby_socket.on('new_friend', function () {
-            load_requests();
+            {#load_requests();#}
             load_friends();
-            load_players();
+            load_users();
         });
 
         lobby_socket.on('friend_removed', function () {
-            load_players();
+            load_users();
             load_friends();
         });
 
         $(document).ready(function (event) {
             load_friends();
-            load_players();
-            load_requests();
+            load_users();
+            {#load_requests();#}
 
             setInterval(function () {
                 load_friends();
-                load_players();
+                load_users();
             }, 5000);
         });
     </script>

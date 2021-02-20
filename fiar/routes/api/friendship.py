@@ -1,28 +1,41 @@
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, jsonify
 from flask_socketio import emit
+from marshmallow import fields
 
 from fiar.data.models import User
 from fiar.data.repositories.friendship import FriendshipRepo
 from fiar.data.repositories.friendship_request import FriendshipRequestRepo
 from fiar.data.repositories.user import UserRepo
-from fiar.data.schemas import user_schema
+from fiar.data.schemas import user_schema, UserSchema
 from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user
 from fiar.routes.socket import LOBBY_NAMESPACE
 from fiar.services.friendship import FriendshipService
+from fiar.services.user import UserService
 
 bp = Blueprint('friendship_api', __name__)
 
 
 # --- Friends ---
 
+class UserWithOnlineSchema(UserSchema):
+    is_online = fields.Boolean()
+
+
+user_with_online_schema = UserWithOnlineSchema()
+
+
 @bp.route('/friends', methods=['GET'])
 @auth_user(RouteType.API)
 @inject
 def get_friends(auth: User,
+                user_service: UserService = Provide[AppContainer.user_service],
                 friendship_repo: FriendshipRepo = Provide[AppContainer.friendship_repo]):
     friends = friendship_repo.get_all_friends_sent_by(auth)
+
+    for friend in friends:
+        friend.is_online = user_service.is_online(friend)
 
     return jsonify(user_schema.dump(friends, many=True))
 
