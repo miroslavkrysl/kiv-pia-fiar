@@ -60,16 +60,16 @@ def db_init_command(db: SqlAlchemyDb = Provide[AppContainer.sqlalchemy_db]):
 @inject
 def db_fill_command(user_service: UserService = Provide[AppContainer.user_service],
                     user_repo: UserRepo = Provide[AppContainer.user_repo]):
-    user_repo.add(user_service.create_user(username='hello',
-                                           email='hello@example.com',
-                                           password='password'))
+    user_service.create_user(username='hello',
+                             email='hello@example.com',
+                             password='password')
 
-    user_repo.add(user_service.create_user(username="jello",
-                                           email="jello@example.com",
-                                           password="password"))
+    user_service.create_user(username="jello",
+                             email="jello@example.com",
+                             password="password")
 
-    user_repo.add(user_service.create_user(username="mkrysl",
-                                           email="mkrysl@protonmail.com",
-                                           password="password"))
+    user_service.create_user(username="mkrysl",
+                             email="mkrysl@protonmail.com",
+                             password="password")
 
     click.echo('Database filled with example data.')

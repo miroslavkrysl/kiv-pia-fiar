@@ -14,7 +14,7 @@ class AuthService:
     """
 
     SESSION_UID = 'user_uid'
-    G_PREFIX = 'auth_'
+    G_PREFIX = '_auth_'
     G_USER = G_PREFIX + 'user'
 
     def __init__(self, user_repo: UserRepo, hash_service: HashService):
@@ -91,5 +91,3 @@ class AuthService:
             user = None
 
         return user
-
-

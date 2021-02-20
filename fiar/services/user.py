@@ -50,7 +50,10 @@ class UserService:
         password = self.hash_service.hash(password)
         uid = self.uid_service.make_uid()
 
-        return User(uid, username, email, password, is_admin, last_active_at)
+        user = User(uid, username, email, password, is_admin, last_active_at)
+        self.user_repo.add(user)
+
+        return user
 
     def change_uid(self, user: User):
         """

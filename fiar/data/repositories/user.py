@@ -53,7 +53,7 @@ class UserRepo:
         now = datetime.now()
         threshold = now - max_inactive_time
         session = self.db.session
-        users = session.query(User).filter(User.last_active_at >= threshold).order_by(order_by.value)
+        users = session.query(User).filter(user_table.c.last_active_at >= threshold).order_by(order_by.value)
         return users
 
     def add(self, user: User):

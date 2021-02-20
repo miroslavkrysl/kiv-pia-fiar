@@ -13,8 +13,8 @@ class UserSchema(Schema):
         validate.Length(max=255)
     ])
     password = fields.Str(required=True, load_only=True)
-    is_admin = fields.Boolean(required=True, dump_only=True)
-    last_active_at = fields.DateTime(dump_only=True)
+    is_admin = fields.Boolean()
+    last_active_at = fields.DateTime()
 
     @post_load
     def process_input(self, data, **kwargs):

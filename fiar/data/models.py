@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional
 
@@ -13,6 +13,11 @@ class User:
     password: str
     is_admin: bool = field(default=False)
     last_active_at: Optional[datetime] = field(default=None)
+
+    def is_online(self, max_inactive_time: timedelta):
+        now = datetime.now()
+        threshold = now - max_inactive_time
+        return self.last_active_at > threshold
 
 
 class Player(Enum):

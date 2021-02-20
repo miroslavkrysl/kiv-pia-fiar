@@ -1,8 +1,11 @@
 from flask import Flask
 
+from fiar.data.repositories.friendship import FriendshipRepo
+from fiar.data.repositories.friendship_request import FriendshipRequestRepo
 from fiar.data.repositories.user import UserRepo
 from fiar.di.providers import ServiceProvider
 from fiar.services.auth import AuthService
+from fiar.services.friendship import FriendshipService
 from fiar.services.hash import HashService
 from fiar.services.mail import MailService
 from fiar.services.pswd_token import PswdTokenService
@@ -10,6 +13,8 @@ from fiar.services.token import TokenService
 from fiar.services.uid import UidService
 from fiar.services.user import UserService
 
+
+# --- Util services ---
 
 class UidServiceProvider(ServiceProvider):
 
@@ -82,6 +87,8 @@ class AuthServiceProvider(ServiceProvider):
         pass
 
 
+# --- Entity services ---
+
 class UserServiceProvider(ServiceProvider):
 
     def init(self, app: Flask,
@@ -91,4 +98,15 @@ class UserServiceProvider(ServiceProvider):
         return UserService(user_repo, uid_service, hash_service)
 
     def shutdown(self, resource: UserService) -> None:
+        pass
+
+
+class FriendshipServiceProvider(ServiceProvider):
+
+    def init(self, app: Flask,
+             friendship_repo: FriendshipRepo,
+             friendship_request_repo: FriendshipRequestRepo) -> FriendshipService:
+        return FriendshipService(friendship_repo, friendship_request_repo)
+
+    def shutdown(self, resource: FriendshipService) -> None:
         pass
