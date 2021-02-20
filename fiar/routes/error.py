@@ -7,12 +7,7 @@ def register_error_handlers(app: Flask):
 
 
 def http_exception(exception: HTTPException, **kwargs):
-    if request.content_type == 'application/json':
-        response = exception.get_response()
-        response.status = exception.code
-        return response
-    else:
-        return render_template('error.html',
-                               description=exception.description,
-                               name=exception.name,
-                               code=exception.code)
+    return render_template('error.html',
+                           description=exception.description,
+                           name=exception.name,
+                           code=exception.code)
