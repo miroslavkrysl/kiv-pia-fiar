@@ -27,7 +27,7 @@ class AppContainer(containers.DeclarativeContainer):
     uid_service = providers.Resource(UidServiceProvider, app, user_repo)
     auth_service = providers.Resource(AuthServiceProvider, app, user_repo, hash_service)
     token_service = providers.Resource(TokenServiceProvider, app)
-    pswd_token_service = providers.Resource(PswdTokenServiceProvider, token_service, user_repo)
+    pswd_token_service = providers.Resource(PswdTokenServiceProvider, app, token_service, user_repo)
 
     # --- Entity services ---
     user_service = providers.Resource(UserServiceProvider, app, user_repo, uid_service, hash_service)

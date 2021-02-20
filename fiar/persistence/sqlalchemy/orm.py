@@ -37,8 +37,8 @@ game_table = Table(
 )
 
 mapper_registry.map_imperatively(Game, game_table, properties={
-    'player_o': relationship(User, backref='games_as_o'),
-    'player_x': relationship(User, backref='games_as_x')
+    'player_o': relationship(User, backref='games_as_o', foreign_keys=[game_table.c.player_o_id]),
+    'player_x': relationship(User, backref='games_as_x', foreign_keys=[game_table.c.player_x_id])
 })
 
 # --- Move ---
@@ -66,8 +66,8 @@ invite_table = Table(
 )
 
 mapper_registry.map_imperatively(Invite, invite_table, properties={
-    'sender': relationship(User, backref='invites_sent'),
-    'recipient': relationship(User, backref='invites_received')
+    'sender': relationship(User, backref='invites_sent', foreign_keys=[invite_table.c.sender_id]),
+    'recipient': relationship(User, backref='invites_received', foreign_keys=[invite_table.c.recipient_id])
 })
 
 # --- FriendshipRequest ---
@@ -79,8 +79,10 @@ friendship_request_table = Table(
 )
 
 mapper_registry.map_imperatively(FriendshipRequest, friendship_request_table, properties={
-    'sender': relationship(User, backref='friendship_requests_sent'),
-    'recipient': relationship(User, backref='friendship_requests_received')
+    'sender': relationship(User, backref='friendship_requests_sent',
+                           foreign_keys=[friendship_request_table.c.sender_id]),
+    'recipient': relationship(User, backref='friendship_requests_received',
+                              foreign_keys=[friendship_request_table.c.recipient_id])
 })
 
 # --- Friendship ---
@@ -92,6 +94,6 @@ friendship_table = Table(
 )
 
 mapper_registry.map_imperatively(Friendship, friendship_table, properties={
-    'sender': relationship(User, backref='friendship_sent'),
-    'recipient': relationship(User, backref='friendship_received')
+    'sender': relationship(User, backref='friendship_sent', foreign_keys=[friendship_table.c.sender_id]),
+    'recipient': relationship(User, backref='friendship_received', foreign_keys=[friendship_table.c.recipient_id])
 })

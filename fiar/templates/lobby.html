@@ -35,73 +35,36 @@
 
         // --- REST calls ---
 
-        function add_friend_request(friend_id) {
-            $.ajax({
-                url: '{{ url_for('friendship.request_api') }}',
-                type: 'post',
-                dataType: 'json',
-                data: {
-                    id: friend_id
-                }
-            });
-        }
-
-        function remove_friend_request(id) {
-            $.ajax({
-                url: '{{ url_for('friendship.request_api') }}' + id,
-                type: 'delete',
-                dataType: 'json'
-            });
-        }
-
-        function add_friendship(friend_id) {
-            $.ajax({
-                url: '{{ url_for('friendship.friendship_api') }}',
-                type: 'post',
-                dataType: 'json',
-                data: {
-                    id: friend_id
-                }
-            });
-        }
-
-
-        function remove_friendship(id) {
-            $.ajax({
-                url: '{{ url_for('friendship.friendship_api') }}' + id,
-                type: 'delete',
-                dataType: 'json'
-            });
-        }
 
         // --- AJAX loads ---
 
         function load_friends() {
             let table = $("#friends-table");
 
-            table.find("tbody").load("{{ url_for('lobby.friends_rows') }}", function () {
+            /*
+            table.find("tbody").load("{{ url_for('friendship_api.get_friends') }}", function () {
                 table.find("[data-btn-unfriend]").click(function (event) {
                     let id = $(this).attr('data-id');
                     remove_friendship(id);
                 });
-            });
+            });*/
         }
 
         function load_players() {
             let table = $("#players-table");
-
-            table.find("tbody").load("{{ url_for('lobby.players_rows') }}", function () {
+            /*
+            table.find("tbody").load("{{ url_for('user_api.get_online_users') }}", function () {
                 table.find("[data-btn-friend]").click(function (event) {
                     let id = $(this).attr('data-id');
                     add_friend_request(id);
                 });
-            });
+            });*/
         }
 
         function load_requests() {
             let table = $("#friendship-requests-table");
-
-            table.find("tbody").load("{{ url_for('lobby.friendship_requests_rows') }}", function () {
+            /*
+            table.find("tbody").load("{{ url_for('friendship_api.get_friends_requested') }}", function () {
                 table.find("[data-btn-accept]").click(function (event) {
                     let id = $(this).attr('data-id');
                     add_friendship(id);
@@ -110,7 +73,7 @@
                     let id = $(this).attr('data-id');
                     remove_friend_request(id);
                 });
-            });
+            });*/
         }
 
         // --- Socket ---

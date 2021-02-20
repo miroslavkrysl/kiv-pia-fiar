@@ -11,7 +11,7 @@
                 <div class="alert alert-danger me-auto d-none" role="alert" id="error-message">
                 </div>
 
-                <form id="login-form" method="POST" action="{{ url_for('user.login_api') }}">
+                <form id="login-form" data-method="PUT" data-action="{{ url_for('user_api.put_login') }}">
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
                         <input type="email" class="form-control" name="email">
@@ -36,8 +36,8 @@
             event.preventDefault();
 
             let form = $(this);
-            let url = form.attr('action');
-            let method = form.attr('method');
+            let url = form.attr('data-action');
+            let method = form.attr('data-method');
 
             let submit_button = form.find('[type=submit]');
             submit_button.prop('disabled', true);

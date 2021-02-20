@@ -7,7 +7,7 @@
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4">
                 <h4 class="mb-3">Registration</h4>
-                <form id="register-form" method="POST" action="{{ url_for('user.register_api') }}">
+                <form id="register-form" data-method="POST" data-action="{{ url_for('user_api.post_registration') }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" name="username" id="username">
@@ -54,8 +54,8 @@
             event.preventDefault();
 
             let form = $(this);
-            let url = form.attr('action');
-            let method = form.attr('method');
+            let url = form.attr('data-action');
+            let method = form.attr('data-method');
 
             form.find("input").each(function (index) {
                 $(this).removeClass("is-invalid");

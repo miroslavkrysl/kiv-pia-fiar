@@ -8,21 +8,19 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='lib/bootstrap.min.css') }}">
 </head>
 <body>
-{# Dummy script to prevent loading scripts before stylesheets #}
-<script>0</script>
 
 <header class="navbar navbar-expand-lg navbar-light border-bottom shadow-sm p-3 px-md-4 mb-4 bg-light">
     <div class="container">
         <a class="navbar-brand me-auto" href="{{ url_for('lobby.index') }}">FIAR - Five in a Row</a>
         <ul class="navbar-nav">
-            {% if g.auth_user %}
+            {% if auth_user %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('lobby.index') }}">Lobby</a>
                 </li>
                 <li class="dropdown ms-2">
                     <a type="button" href="#" class="btn btn-outline-primary dropdown-toggle" id="user-menu-btn"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ g.auth_user.username }}
+                        {{ auth_user.username }}
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="user-menu-btn">
                         <li><a class="dropdown-item" href="#">Change password</a></li>
@@ -61,6 +59,8 @@
 <script src="{{ url_for('static', filename='lib/font-awesome.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/socket.io.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/zxcvbn.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
 
 
 {# Message box script #}
@@ -73,7 +73,7 @@
         event.preventDefault();
 
         $.ajax({
-            url: '{{ url_for('user.login_api') }}',
+            url: '{{ url_for('user_api.delete_login') }}',
             type: 'delete',
             dataType: 'json',
             success: function (response) {

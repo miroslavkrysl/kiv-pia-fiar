@@ -62,3 +62,9 @@ class UserService:
         """
         uid = self.uid_service.make_uid()
         user.uid = uid
+
+    def username_exists(self, username: str) -> bool:
+        return self.user_repo.get_by_username(username) is not None
+
+    def email_exists(self, email: str) -> bool:
+        return self.user_repo.get_by_email(email) is not None

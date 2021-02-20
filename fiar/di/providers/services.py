@@ -61,14 +61,16 @@ class PswdTokenServiceProvider(ServiceProvider):
 class MailServiceProvider(ServiceProvider):
 
     def init(self, app: Flask) -> MailService:
-        host = app.config['MAIL']['HOST'],
-        port = app.config['MAIL']['PORT'],
-        username = app.config['MAIL']['USERNAME'],
-        password = app.config['MAIL']['PASSWORD'],
-        ssl = app.config['MAIL']['SSL'],
-        tls = app.config['MAIL']['TLS'],
-        sender_name = app.config['MAIL']['SENDER_NAME'],
-        sender_addr = app.config['MAIL']['SENDER_ADDR'],
+        mail_config = app.config['MAIL']
+
+        host = mail_config['HOST']
+        port = mail_config['PORT']
+        username = mail_config['USERNAME']
+        password = mail_config['PASSWORD']
+        ssl = mail_config['SSL']
+        tls = mail_config['TLS']
+        sender_name = mail_config['SENDER_NAME']
+        sender_addr = mail_config['SENDER_ADDR']
 
         return MailService(host, port, username, password, ssl, tls, sender_name, sender_addr)
 

@@ -4,10 +4,11 @@ from flask import Flask
 from flask_socketio import SocketIO
 
 from fiar.cli import register_commands
-from fiar.routes import LOBBY_NAMESPACE, USER_NAMESPACE
+from fiar.routes.api import register_api_routes
 from fiar.routes.error import register_error_handlers
-from fiar.routes.lobby import LobbySocket
-from fiar.routes.user import UserSocket
+from fiar.routes.html import register_html_routes
+from fiar.routes.socket import register_socket_routes
+from fiar.routes.templating import register_preprocessors
 from fiar.utils import load_config
 
 
@@ -19,20 +20,26 @@ def create_app() -> Flask:
     config = namedtuple('Conf', config_dict.keys())(**config_dict)
     app.config.from_object(config)
 
-    # setup error handlers
-    register_error_handlers(app)
-
-    # setup routes
-    from fiar.routes import lobby, user, game, friendship
-    app.register_blueprint(lobby.bp, url_prefix='/')
-    app.register_blueprint(user.bp, url_prefix='/user')
-    app.register_blueprint(game.bp, url_prefix='/game')
-    app.register_blueprint(friendship.bp, url_prefix='/friendship')
+    # setup cookie security
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+    )
 
     # setup sockets
     app.socket_io = SocketIO(app)
-    app.socket_io.on_namespace(UserSocket(USER_NAMESPACE))
-    app.socket_io.on_namespace(LobbySocket(LOBBY_NAMESPACE))
+
+    # setup template preprocessors
+    register_preprocessors(app)
+
+    # setup routes
+    register_html_routes(app)
+    register_api_routes(app)
+    register_socket_routes(app)
+
+    # setup error handlers
+    register_error_handlers(app)
 
     # initialize commands
     register_commands(app)

@@ -13,7 +13,7 @@ class MailService:
                  ssl: bool,
                  tls: bool,
                  sender_name: str,
-                 sender_addr: str, ):
+                 sender_addr: str):
         self.host = host
         self.port = port
         self.username = username
