@@ -11,7 +11,7 @@ pathlib = "*"
 # di
 dependency-injector = "*"
 # db
-sqlalchemy = "*"
+sqlalchemy = "==1.4.0b3"
 psycopg2-binary = "*"
 # hashing
 passlib = {extras = ["bcrypt"], version = "*"}
@@ -20,12 +20,11 @@ itsdangerous = "*"
 marshmallow = "*"
 # flask extensions
 flask-socketio = "*"
-flask-mail = "*"
 # event engine for socketio
 eventlet = "*"
 # wsgi server
 gunicorn = "*"
-pony = "*"
+# function decorators
 wrapt = "*"
 
 [dev-packages]

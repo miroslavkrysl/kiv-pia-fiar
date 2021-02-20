@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from fiar.repositories.user import UserRepo
+from fiar.data.repositories.user import UserRepo
 
 
 class UidService:

@@ -1,10 +1,9 @@
-from functools import wraps
 from typing import Optional
 
-from flask import session, g, Flask, redirect, url_for, request
+from flask import session, g
 
-from fiar.db import User
-from fiar.repositories.user import UserRepo
+from fiar.data.models import User
+from fiar.data.repositories.user import UserRepo
 from fiar.services.hash import HashService
 
 
@@ -14,17 +13,13 @@ class AuthService:
     as well as loading the currently logged user from the session.
     """
 
-    SESSION_UID_NAME = 'user_uid'
+    SESSION_UID = 'user_uid'
     G_PREFIX = 'auth_'
     G_USER = G_PREFIX + 'user'
 
-    def __init__(self, app: Flask, user_repo: UserRepo, hash_service: HashService):
+    def __init__(self, user_repo: UserRepo, hash_service: HashService):
         self.user_repo = user_repo
         self.hash_service = hash_service
-
-        @app.before_request
-        def auth():
-            self.load_user()
 
     def auth_email_password(self, email: str, password: str) -> Optional[User]:
         """
@@ -48,15 +43,15 @@ class AuthService:
         Login the user within the session.
         :param user: The user instance.
         """
-        session[self.SESSION_UID_NAME] = user.uid
+        session[self.SESSION_UID] = user.uid
         self._set_user(user)
 
     def logout(self):
         """
         Logout the user from the session.
         """
-        if self.SESSION_UID_NAME in session:
-            session.pop(self.SESSION_UID_NAME)
+        if self.SESSION_UID in session:
+            session.pop(self.SESSION_UID)
 
         self._set_user(None)
 
@@ -72,28 +67,29 @@ class AuthService:
         """
         return self._get_user() is not None
 
-    def load_user(self):
-        # setup auth global var
-        setattr(g, self.G_USER, {})
+    def _set_user(self, user: Optional[User]):
+        setattr(g, self.G_USER, user)
 
-        # load user
-        user_uid = session.get(self.SESSION_UID_NAME)
+    def _get_user(self) -> User:
+        if not hasattr(g, self.G_USER):
+            user = self._load_user()
+            self._set_user(user)
+            return user
+
+        return getattr(g, self.G_USER)
+
+    def _load_user(self):
+        user_uid = session.get(self.SESSION_UID)
 
         if user_uid is not None:
             user = self.user_repo.get_by_uid(user_uid)
 
             if user is None:
                 # invalid uid
-                session.pop(self.SESSION_UID_NAME)
+                session.pop(self.SESSION_UID)
         else:
             user = None
 
-        self._set_user(user)
-
-    def _set_user(self, user: Optional[User]):
-        setattr(g, self.G_USER, user)
-
-    def _get_user(self) -> User:
-        return getattr(g, self.G_USER)
+        return user
 
 

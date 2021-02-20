@@ -8,36 +8,42 @@ class MailService:
     def __init__(self,
                  host: str,
                  port: int,
-                 user: str,
+                 username: str,
                  password: str,
                  ssl: bool,
                  tls: bool,
-                 from_name: str,
-                 from_addr: str,):
+                 sender_name: str,
+                 sender_addr: str, ):
         self.host = host
         self.port = port
-        self.user = user
+        self.username = username
         self.password = password
         self.ssl = ssl
         self.tls = tls
-        self.from_name = from_name
-        self.from_addr = from_addr
+        self.sender_name = sender_name
+        self.sender_addr = sender_addr
 
-    def send(self, subject: str, receiver: str, content: str):
+    def send(self, subject: str, recipient: str, content: str):
+        """
+        Send an email.
+        :param subject: Email subject.
+        :param recipient: Recipient email address.
+        :param content: Email content
+        """
         msg = EmailMessage()
         msg.set_content(content, subtype='html')
 
         msg['Subject'] = subject
         msg['From'] = self._make_sender()
-        msg['To'] = receiver
+        msg['To'] = recipient
 
         self._send_async(msg)
 
     def _make_sender(self):
-        sender = '<' + self.from_addr + '>'
+        sender = '<' + self.sender_addr + '>'
 
-        if self.from_name is not None:
-            sender = self.from_name + ' ' + sender
+        if self.sender_name is not None:
+            sender = self.sender_name + ' ' + sender
 
         return sender
 
@@ -52,6 +58,6 @@ class MailService:
         if self.tls:
             server.starttls()
 
-        server.login(self.user, self.password)
+        server.login(self.username, self.password)
         server.send_message(msg)
         server.close()

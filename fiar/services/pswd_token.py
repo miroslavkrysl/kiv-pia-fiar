@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fiar.db import User
-from fiar.repositories.user import UserRepo
+from fiar.data.models import User
+from fiar.data.repositories.user import UserRepo
 from fiar.services.token import TokenService
 
 
-class PswdResetService:
+class PswdTokenService:
     """
     Takes care of generating and decoding password reset tokens.
     """
@@ -17,7 +17,7 @@ class PswdResetService:
         self.user_repo = user_repo
         self.exp_time = exp_time
 
-    def make_reset_token(self, user: User) -> str:
+    def make_token(self, user: User) -> str:
         """
         Create a time limited password reset token for the user.
         :param user: The user.
@@ -25,7 +25,7 @@ class PswdResetService:
         """
         return self.token_service.make_token(user.uid)
 
-    def decode_reset_token(self, token: str) -> Optional[User]:
+    def decode_token(self, token: str) -> Optional[User]:
         """
         Decode the time limited password reset token.
         :param token: The token.

@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from fiar.db import User
-from fiar.repositories.user import UserRepo
+from fiar.data.models import User
+from fiar.data.repositories.user import UserRepo
 from fiar.services.hash import HashService
 from fiar.services.uid import UidService
 
@@ -37,27 +37,20 @@ class UserService:
         last_active_at = last_active_at if last_active_at is not None else datetime.now()
         user.last_active_at = last_active_at
 
-    def init_user(self, **kwargs) -> dict:
+    def create_user(self,
+                    username: str,
+                    email: str,
+                    password: str,
+                    is_admin: bool = False,
+                    last_active_at: datetime = None) -> User:
         """
-        Initialize dict fields for creating a new user from the given dict.
-        :param kwargs: The user named fields values.
-        :return: New dict with all required and initialized fields.
+        Create user from the given keyword parameters, initialize non-required and secret fields.
+        :return: New user.
         """
-        user = dict(kwargs)
+        password = self.hash_service.hash(password)
+        uid = self.uid_service.make_uid()
 
-        user['password'] = self.hash_service.hash(user['password'])
-        user['uid'] = self.uid_service.make_uid()
-
-        if 'is_admin' not in user:
-            user['is_admin'] = False
-
-        if 'last_playing_at' not in user:
-            user['last_playing_at'] = datetime.min
-
-        if 'last_active_at' not in user:
-            user['last_active_at'] = datetime.min
-
-        return user
+        return User(uid, username, email, password, is_admin, last_active_at)
 
     def change_uid(self, user: User):
         """

@@ -4,9 +4,9 @@ from flask import Flask
 from flask.cli import with_appcontext
 import passlib.totp
 
-from fiar.di import Container
-from fiar.repositories.user import UserRepo
-from fiar.services.db import Db
+from fiar.data.repositories.user import UserRepo
+from fiar.di.container import AppContainer
+from fiar.persistence.sqlalchemy.db import SqlAlchemyDb
 from fiar.services.user import UserService
 from fiar.utils import load_config, store_config, with_request_context
 
@@ -21,7 +21,7 @@ def register_commands(app: Flask):
 @click.command('key:generate')
 @with_appcontext
 @inject
-def key_generate(app: Flask = Provide[Container.app]):
+def key_generate(app: Flask = Provide[AppContainer.app]):
     key = passlib.totp.generate_secret()
     config = load_config(app)
 
@@ -41,16 +41,16 @@ def key_generate(app: Flask = Provide[Container.app]):
 @click.command('db:drop')
 @with_appcontext
 @inject
-def db_drop_command(db: Db = Provide[Container.db]):
-    db.database.drop_all_tables(with_all_data=True)
+def db_drop_command(db: SqlAlchemyDb = Provide[AppContainer.sqlalchemy_db]):
+    db.drop_tables()
     click.echo('All app related database tables dropped.')
 
 
 @click.command('db:init')
 @with_appcontext
 @inject
-def db_init_command(db: Db = Provide[Container.db]):
-    db.database.create_tables()
+def db_init_command(db: SqlAlchemyDb = Provide[AppContainer.sqlalchemy_db]):
+    db.create_tables()
     click.echo('All database tables created.')
 
 
@@ -58,18 +58,18 @@ def db_init_command(db: Db = Provide[Container.db]):
 @with_appcontext
 @with_request_context
 @inject
-def db_fill_command(user_service: UserService = Provide[Container.user_service],
-                    user_repo: UserRepo = Provide[Container.user_repo]):
-    user_repo.create(**user_service.init_user(username='hello',
-                                              email='hello@example.com',
-                                              password='password'))
+def db_fill_command(user_service: UserService = Provide[AppContainer.user_service],
+                    user_repo: UserRepo = Provide[AppContainer.user_repo]):
+    user_repo.add(user_service.create_user(username='hello',
+                                           email='hello@example.com',
+                                           password='password'))
 
-    user_repo.create(**user_service.init_user(username="jello",
-                                              email="jello@example.com",
-                                              password="password"))
+    user_repo.add(user_service.create_user(username="jello",
+                                           email="jello@example.com",
+                                           password="password"))
 
-    user_repo.create(**user_service.init_user(username="mkrysl",
-                                              email="mkrysl@protonmail.com",
-                                              password="password"))
+    user_repo.add(user_service.create_user(username="mkrysl",
+                                           email="mkrysl@protonmail.com",
+                                           password="password"))
 
     click.echo('Database filled with example data.')
