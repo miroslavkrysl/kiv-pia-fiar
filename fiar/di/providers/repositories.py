@@ -1,8 +1,10 @@
 from flask import Flask
 
-from fiar.data.repositories.friendship import FriendshipRepo
-from fiar.data.repositories.friendship_request import FriendshipRequestRepo
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
+from fiar.persistence.sqlalchemy.repositories.game import GameRepo
+from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
+from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.di.providers import ServiceProvider
 from fiar.persistence.sqlalchemy.db import SqlAlchemyDb
 
@@ -25,10 +27,28 @@ class FriendshipRepoProvider(ServiceProvider):
         pass
 
 
-class FriendshipRequestRepoProvider(ServiceProvider):
+class RequestRepoProvider(ServiceProvider):
 
-    def init(self, app: Flask, db: SqlAlchemyDb) -> FriendshipRequestRepo:
-        return FriendshipRequestRepo(db)
+    def init(self, app: Flask, db: SqlAlchemyDb) -> RequestRepo:
+        return RequestRepo(db)
 
-    def shutdown(self, resource: FriendshipRequestRepo) -> None:
+    def shutdown(self, resource: RequestRepo) -> None:
+        pass
+
+
+class GameRepoProvider(ServiceProvider):
+
+    def init(self, app: Flask, db: SqlAlchemyDb) -> GameRepo:
+        return GameRepo(db)
+
+    def shutdown(self, resource: GameRepo) -> None:
+        pass
+
+
+class InviteRepoProvider(ServiceProvider):
+
+    def init(self, app: Flask, db: SqlAlchemyDb) -> InviteRepo:
+        return InviteRepo(db)
+
+    def shutdown(self, resource: InviteRepo) -> None:
         pass

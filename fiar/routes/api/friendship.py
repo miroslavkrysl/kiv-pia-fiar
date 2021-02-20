@@ -3,9 +3,9 @@ from flask import Blueprint, jsonify
 from marshmallow import fields
 
 from fiar.data.models import User
-from fiar.data.repositories.friendship import FriendshipRepo
-from fiar.data.repositories.friendship_request import FriendshipRequestRepo
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
+from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.data.schemas import user_schema, UserSchema
 from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user
@@ -44,9 +44,9 @@ def get_friends(auth: User,
 @auth_user(RouteType.API)
 @inject
 def get_friends_requested(auth: User,
-                          friendship_request_repo: FriendshipRequestRepo = Provide[
-                              AppContainer.friendship_request_repo]):
-    users = friendship_request_repo.get_all_users_requested_by(auth)
+                          request_repo: RequestRepo = Provide[
+                              AppContainer.request_repo]):
+    users = request_repo.get_all_users_requested_by(auth)
 
     return jsonify(user_schema.dump(users, many=True))
 
@@ -57,9 +57,9 @@ def get_friends_requested(auth: User,
 @auth_user(RouteType.API)
 @inject
 def get_friends_received(auth: User,
-                         friendship_request_repo: FriendshipRequestRepo = Provide[
-                             AppContainer.friendship_request_repo]):
-    users = friendship_request_repo.get_all_users_received_by(auth)
+                         request_repo: RequestRepo = Provide[
+                             AppContainer.request_repo]):
+    users = request_repo.get_all_users_received_by(auth)
 
     return jsonify(user_schema.dump(users, many=True))
 

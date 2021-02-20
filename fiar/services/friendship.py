@@ -1,8 +1,6 @@
-from typing import Iterable
-
 from fiar.data.models import User, Friendship
-from fiar.data.repositories.friendship import FriendshipRepo
-from fiar.data.repositories.friendship_request import FriendshipRequestRepo
+from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
+from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
 
 
 class FriendshipService:
@@ -12,9 +10,9 @@ class FriendshipService:
 
     def __init__(self,
                  friendship_repo: FriendshipRepo,
-                 friendship_request_repo: FriendshipRequestRepo):
+                 request_repo: RequestRepo):
         self.friendship_repo = friendship_repo
-        self.friendship_request_repo = friendship_request_repo
+        self.request_repo = request_repo
 
     def are_friends(self, user: User, friend: User):
         """
@@ -55,8 +53,8 @@ class FriendshipService:
         :param friend: Friend.
         :return: True if a request is pending, False otherwise.
         """
-        return self.friendship_request_repo.get_by_users(user, friend) is not None \
-               or self.friendship_request_repo.get_by_users(friend, user) is not None
+        return self.request_repo.get_by_users(user, friend) is not None \
+               or self.request_repo.get_by_users(friend, user) is not None
 
     def has_received_request(self, user: User, sender: User) -> bool:
         """
@@ -65,14 +63,14 @@ class FriendshipService:
         :param sender: Sender.
         :return: True if a request was received, False otherwise.
         """
-        return self.friendship_request_repo.get_by_users(sender, user) is not None
+        return self.request_repo.get_by_users(sender, user) is not None
 
     def remove_pending_requests(self, user: User, friend: User):
-        fs_req1 = self.friendship_request_repo.get_by_users(user, friend)
-        fs_req2 = self.friendship_request_repo.get_by_users(friend, user)
+        fs_req1 = self.request_repo.get_by_users(user, friend)
+        fs_req2 = self.request_repo.get_by_users(friend, user)
 
         if fs_req1:
-            self.friendship_request_repo.delete(fs_req1)
+            self.request_repo.delete(fs_req1)
 
         if fs_req2:
-            self.friendship_request_repo.delete(fs_req2)
+            self.request_repo.delete(fs_req2)

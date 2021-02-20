@@ -2,12 +2,15 @@ from datetime import timedelta
 
 from flask import Flask
 
-from fiar.data.repositories.friendship import FriendshipRepo
-from fiar.data.repositories.friendship_request import FriendshipRequestRepo
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
+from fiar.persistence.sqlalchemy.repositories.game import GameRepo
+from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
+from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.di.providers import ServiceProvider
 from fiar.services.auth import AuthService
 from fiar.services.friendship import FriendshipService
+from fiar.services.game import GameService
 from fiar.services.hash import HashService
 from fiar.services.mail import MailService
 from fiar.services.pswd_token import PswdTokenService
@@ -110,8 +113,19 @@ class FriendshipServiceProvider(ServiceProvider):
 
     def init(self, app: Flask,
              friendship_repo: FriendshipRepo,
-             friendship_request_repo: FriendshipRequestRepo) -> FriendshipService:
+             friendship_request_repo: RequestRepo) -> FriendshipService:
         return FriendshipService(friendship_repo, friendship_request_repo)
 
     def shutdown(self, resource: FriendshipService) -> None:
+        pass
+
+
+class GameServiceProvider(ServiceProvider):
+
+    def init(self, app: Flask,
+             game_repo: GameRepo,
+             invite_repo: InviteRepo) -> GameService:
+        return GameService(game_repo, invite_repo)
+
+    def shutdown(self, resource: GameService) -> None:
         pass

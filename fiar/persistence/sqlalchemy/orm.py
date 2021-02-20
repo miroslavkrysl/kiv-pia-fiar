@@ -2,7 +2,7 @@ from sqlalchemy import MetaData, Table, Column, DateTime, Integer, String, Boole
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy.orm.decl_api import registry
 
-from fiar.data.models import User, Player, Game, Move, Friendship, FriendshipRequest, Invite
+from fiar.data.models import User, Player, Game, Move, Friendship, Request, Invite
 
 metadata = MetaData()
 mapper_registry = registry()
@@ -72,17 +72,17 @@ mapper_registry.map_imperatively(Invite, invite_table, properties={
 
 # --- FriendshipRequest ---
 
-friendship_request_table = Table(
-    'friendship_request', metadata,
+request_table = Table(
+    'request', metadata,
     Column('sender_id', Integer, ForeignKey('user.id'), primary_key=True),
     Column('recipient_id', Integer, ForeignKey('user.id'), primary_key=True),
 )
 
-mapper_registry.map_imperatively(FriendshipRequest, friendship_request_table, properties={
-    'sender': relationship(User, backref='friendship_requests_sent',
-                           foreign_keys=[friendship_request_table.c.sender_id]),
-    'recipient': relationship(User, backref='friendship_requests_received',
-                              foreign_keys=[friendship_request_table.c.recipient_id])
+mapper_registry.map_imperatively(Request, request_table, properties={
+    'sender': relationship(User, backref='requests_sent',
+                           foreign_keys=[request_table.c.sender_id]),
+    'recipient': relationship(User, backref='requests_received',
+                              foreign_keys=[request_table.c.recipient_id])
 })
 
 # --- Friendship ---

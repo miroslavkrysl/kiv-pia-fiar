@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from fiar.data.models import User
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.services.hash import HashService
 from fiar.services.uid import UidService
 

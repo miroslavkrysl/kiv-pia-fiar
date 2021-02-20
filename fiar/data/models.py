@@ -51,7 +51,7 @@ class Invite:
 
 
 @dataclass
-class FriendshipRequest:
+class Request:
     sender_id: int
     recipient_id: int
 

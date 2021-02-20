@@ -5,7 +5,7 @@ from flask import Blueprint, current_app, jsonify, request, url_for, render_temp
 from marshmallow import fields, ValidationError
 
 from fiar.data.models import User
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.data.schemas import UserSchema, user_schema
 from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user

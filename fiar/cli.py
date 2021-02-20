@@ -4,7 +4,7 @@ from flask import Flask
 from flask.cli import with_appcontext
 import passlib.totp
 
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.di.container import AppContainer
 from fiar.persistence.sqlalchemy.db import SqlAlchemyDb
 from fiar.services.user import UserService

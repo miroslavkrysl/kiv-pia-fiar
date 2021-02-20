@@ -1,7 +1,7 @@
 import secrets
 import string
 
-from fiar.data.repositories.user import UserRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 
 
 class UidService:

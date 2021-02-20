@@ -24,20 +24,25 @@ gulp.task('compile:images', function () {
 
 gulp.task('libs', function () {
     return merge(
+        // bootstrap
         gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css'),
         gulp.src('node_modules/bootstrap/dist/css/bootstrap.min.css.map'),
         gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js'),
         gulp.src('node_modules/bootstrap/dist/js/bootstrap.bundle.min.js.map'),
 
+        // jquery
         gulp.src('node_modules/jquery/dist/jquery.min.js'),
         gulp.src('node_modules/jquery/dist/jquery.min.map'),
 
+        // socket.io
         gulp.src('node_modules/socket.io/client-dist/socket.io.min.js'),
         gulp.src('node_modules/socket.io/client-dist/socket.io.min.js.map'),
 
+        // password strength
         gulp.src('node_modules/zxcvbn/dist/zxcvbn.js'),
         gulp.src('node_modules/zxcvbn/dist/zxcvbn.js.map'),
 
+        // font awesome
         gulp.src('node_modules/@fortawesome/fontawesome-free/js/all.min.js')
             .pipe(rename('font-awesome.min.js')),
     ).pipe(gulp.dest('fiar/static/lib'));
