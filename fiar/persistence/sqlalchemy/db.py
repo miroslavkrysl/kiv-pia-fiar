@@ -40,7 +40,9 @@ class SqlAlchemyDb:
         """
         Drop all tables associated with this database.
         """
-        self._metadata.drop_all(self._engine)
+        # self._metadata.drop_all(self._engine)
+        for table in reversed(self._metadata.sorted_tables):
+            table.drop(self._engine)
 
     def exit_session(self):
         """

@@ -18,11 +18,6 @@ class User:
         return isinstance(o, self.__class__) and self.id == o.id
 
 
-class Player(Enum):
-    O = 'o'
-    X = 'x'
-
-
 @dataclass
 class Game:
     id: int = field(init=False)
@@ -30,7 +25,7 @@ class Game:
     player_x_id: int
     player_o_last_active_at: Optional[datetime]
     player_x_last_active_at: Optional[datetime]
-    winner: Optional[Player] = field(default=None)
+    winner: Optional[int] = field(default=None)
     created_at: datetime = field(default_factory=datetime.now)
     ended_at: Optional[datetime] = field(default=None)
 
@@ -39,7 +34,7 @@ class Game:
 class Move:
     id: int = field(init=False)
     game_id: int
-    player: Player
+    player: int
     row: int
     col: int
 

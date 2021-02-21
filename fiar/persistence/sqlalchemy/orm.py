@@ -2,7 +2,7 @@ from sqlalchemy import MetaData, Table, Column, DateTime, Integer, String, Boole
 from sqlalchemy.orm import mapper, relationship
 from sqlalchemy.orm.decl_api import registry
 
-from fiar.data.models import User, Player, Game, Move, Friendship, Request, Invite
+from fiar.data.models import User, Game, Move, Friendship, Request, Invite
 
 metadata = MetaData()
 mapper_registry = registry()
@@ -33,7 +33,7 @@ game_table = Table(
     Column('player_x_last_active_at', DateTime),
     Column('created_at', DateTime, nullable=False),
     Column('ended_at', DateTime),
-    Column('winner', Enum(Player))
+    Column('winner', Integer)
 )
 
 mapper_registry.map_imperatively(Game, game_table, properties={
@@ -47,7 +47,7 @@ move_table = Table(
     'move', metadata,
     Column('id', Integer, primary_key=True),
     Column('game_id', Integer, ForeignKey('game.id'), nullable=False),
-    Column('player', Enum(Player), nullable=False),
+    Column('player', Integer, nullable=False),
     Column('row', Integer, nullable=False),
     Column('col', Integer, nullable=False),
     UniqueConstraint('game_id', 'player', 'row', 'col')
