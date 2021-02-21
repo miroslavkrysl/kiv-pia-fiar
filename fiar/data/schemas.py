@@ -25,36 +25,3 @@ class UserSchema(Schema):
 
 
 user_schema = UserSchema()
-
-
-# --- Invite ---
-
-class InviteSchema(Schema):
-    sender_id = fields.Int()
-    recipient_id = fields.Int()
-
-
-invite_schema = InviteSchema()
-
-
-# --- FriendshipRequest ---
-
-class FriendshipRequestSchema(Schema):
-    sender_id = fields.Int()
-    recipient_id = fields.Int()
-
-
-friendship_request_schema = FriendshipRequestSchema()
-
-
-# --- Friendship ---
-
-class FriendshipSchema(Schema):
-    sender_id = fields.Int()
-    recipient_id = fields.Int()
-
-
-friendship_schema = FriendshipSchema()
-
-
-# --- Game ---

@@ -23,8 +23,6 @@ class Game:
     id: int = field(init=False)
     player_o_id: int
     player_x_id: int
-    player_o_last_active_at: Optional[datetime]
-    player_x_last_active_at: Optional[datetime]
     winner: Optional[int] = field(default=None)
     created_at: datetime = field(default_factory=datetime.now)
     ended_at: Optional[datetime] = field(default=None)
