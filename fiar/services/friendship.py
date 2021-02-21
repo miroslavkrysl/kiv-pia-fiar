@@ -1,4 +1,4 @@
-from fiar.data.models import User, Friendship
+from fiar.data.models import User, Friendship, Request
 from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
 from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
 
@@ -34,10 +34,6 @@ class FriendshipService:
 
         self.remove_pending_requests(user, friend)
 
-    def deny_friendship(self, user: User, friend: User):
-        # remove pending requests
-        self.remove_pending_requests(user, friend)
-
     def remove_friendship(self, user: User, friend: User):
         # delete bidirectional friendship
         fs1 = self.friendship_repo.get_by_users(user, friend)
@@ -66,6 +62,11 @@ class FriendshipService:
         return self.request_repo.get_by_users(sender, user) is not None
 
     def remove_pending_requests(self, user: User, friend: User):
+        """
+        Remove pending friendship requests between the two users.
+        :param user: User
+        :param friend: Opponent.
+        """
         req1 = self.request_repo.get_by_users(user, friend)
         req2 = self.request_repo.get_by_users(friend, user)
 
@@ -74,3 +75,7 @@ class FriendshipService:
 
         if req2:
             self.request_repo.delete(req2)
+
+    def create_request(self, user: User, friend: User):
+        request = Request(user.id, friend.id)
+        self.request_repo.add(request)

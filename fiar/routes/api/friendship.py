@@ -109,13 +109,13 @@ def delete_friendship(friend_id: int,
 
 # --- Friendship request ---
 
-@bp.route('/request/<int:friend_id>', methods=['PUT'])
+@bp.route('/request/<int:friend_id>', methods=['POST'])
 @auth_user(RouteType.API)
 @inject
-def put_request(friend_id: int,
-                auth: User,
-                user_repo: UserRepo = Provide[AppContainer.user_repo],
-                friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
+def post_request(friend_id: int,
+                 auth: User,
+                 user_repo: UserRepo = Provide[AppContainer.user_repo],
+                 friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
     friend = user_repo.get_by_id(friend_id)
 
     if friend is None:
@@ -130,7 +130,7 @@ def put_request(friend_id: int,
     if friendship_service.has_received_request(friend, auth):
         return jsonify(), 200
 
-    friendship_service.accept_friendship(auth, friend)
+    friendship_service.create_request(auth, friend)
 
     return jsonify(), 201
 
@@ -148,6 +148,6 @@ def delete_request(friend_id: int,
         return jsonify({'error': f'User with {friend_id} does not exist'}), 404
 
     if friendship_service.is_request_pending(auth, friend):
-        friendship_service.deny_friendship(auth, friend)
+        friendship_service.remove_pending_requests(auth, friend)
 
     return jsonify(), 200
