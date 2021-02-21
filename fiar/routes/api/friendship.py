@@ -1,67 +1,38 @@
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, jsonify
-from marshmallow import fields
 
 from fiar.data.models import User
 from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
 from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
 from fiar.persistence.sqlalchemy.repositories.user import UserRepo
-from fiar.data.schemas import user_schema, UserSchema
+from fiar.data.schemas import friendship_schema, request_schema
 from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user
 from fiar.services.friendship import FriendshipService
-from fiar.services.user import UserService
 
 bp = Blueprint('friendship_api', __name__)
 
 
-# --- Friends ---
+# --- Friendships ---
 
-class UserWithOnlineSchema(UserSchema):
-    is_online = fields.Boolean()
-
-
-user_with_online_schema = UserWithOnlineSchema()
-
-
-@bp.route('/friends', methods=['GET'])
+@bp.route('/friendships', methods=['GET'])
 @auth_user(RouteType.API)
 @inject
-def get_friends(auth: User,
-                user_service: UserService = Provide[AppContainer.user_service],
+def get_friendships(auth: User,
                 friendship_repo: FriendshipRepo = Provide[AppContainer.friendship_repo]):
-    friends = friendship_repo.get_all_friends_sent_by(auth)
-
-    for friend in friends:
-        friend.is_online = user_service.is_online(friend)
-
-    return jsonify(user_schema.dump(friends, many=True))
+    friendships = friendship_repo.get_all_by_user(auth)
+    return jsonify(friendship_schema.dump(friendships, many=True))
 
 
-# --- Friends requested ---
+# --- Friendship requests ---
 
-@bp.route('/friends_requested', methods=['GET'])
+@bp.route('/requests', methods=['GET'])
 @auth_user(RouteType.API)
 @inject
-def get_friends_requested(auth: User,
-                          request_repo: RequestRepo = Provide[
-                              AppContainer.request_repo]):
-    users = request_repo.get_all_users_requested_by(auth)
-
-    return jsonify(user_schema.dump(users, many=True))
-
-
-# --- Friends received ---
-
-@bp.route('/friends_received', methods=['GET'])
-@auth_user(RouteType.API)
-@inject
-def get_friends_received(auth: User,
-                         request_repo: RequestRepo = Provide[
-                             AppContainer.request_repo]):
-    users = request_repo.get_all_users_received_by(auth)
-
-    return jsonify(user_schema.dump(users, many=True))
+def get_requests(auth: User,
+                 request_repo: RequestRepo = Provide[AppContainer.request_repo]):
+    requests = request_repo.get_all_by_user(auth)
+    return jsonify(request_schema.dump(requests, many=True))
 
 
 # --- Friendship ---

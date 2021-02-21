@@ -3,9 +3,10 @@ from flask import Blueprint, jsonify, request
 from marshmallow import ValidationError
 
 from fiar.data.models import User, MoveResult
-from fiar.data.schemas import game_schema, move_schema
+from fiar.data.schemas import game_schema, move_schema, invite_schema
 from fiar.di.container import AppContainer
 from fiar.persistence.sqlalchemy.repositories.game import GameRepo
+from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.routes.decorators import auth_user, RouteType
 from fiar.services.game import GameService
@@ -13,53 +14,26 @@ from fiar.services.game import GameService
 bp = Blueprint('game_api', __name__)
 
 
-# # --- Friends ---
-#
-# class UserWithOnlineSchema(UserSchema):
-#     is_online = fields.Boolean()
-#
-#
-# user_with_online_schema = UserWithOnlineSchema()
-#
-#
-# @bp.route('/friends', methods=['GET'])
-# @auth_user(RouteType.API)
-# @inject
-# def get_friends(auth: User,
-#                 user_service: UserService = Provide[AppContainer.user_service],
-#                 friendship_repo: FriendshipRepo = Provide[AppContainer.friendship_repo]):
-#     friends = friendship_repo.get_all_friends_sent_by(auth)
-#
-#     for friend in friends:
-#         friend.is_online = user_service.is_online(friend)
-#
-#     return jsonify(user_schema.dump(friends, many=True))
-#
-#
-# # --- Friends requested ---
-#
-# @bp.route('/friends_requested', methods=['GET'])
-# @auth_user(RouteType.API)
-# @inject
-# def get_friends_requested(auth: User,
-#                           friendship_request_repo: FriendshipRequestRepo = Provide[
-#                               AppContainer.request_repo]):
-#     users = friendship_request_repo.get_all_users_requested_by(auth)
-#
-#     return jsonify(user_schema.dump(users, many=True))
-#
-#
-# # --- Friends received ---
-#
-# @bp.route('/friends_received', methods=['GET'])
-# @auth_user(RouteType.API)
-# @inject
-# def get_friends_received(auth: User,
-#                          friendship_request_repo: FriendshipRequestRepo = Provide[
-#                              AppContainer.request_repo]):
-#     users = friendship_request_repo.get_all_users_received_by(auth)
-#
-#     return jsonify(user_schema.dump(users, many=True))
+# --- Games ---
+
+@bp.route('/games', methods=['GET'])
+@auth_user(RouteType.API)
+@inject
+def get_games(auth: User,
+              game_repo: GameRepo = Provide[AppContainer.game_repo]):
+    games = game_repo.get_all_by_player(auth)
+    return jsonify(game_schema.dump(games, many=True))
+
+
+# --- Invites ---
+
+@bp.route('/invites', methods=['GET'])
+@auth_user(RouteType.API)
+@inject
+def get_invites(auth: User,
+                invite_repo: InviteRepo = Provide[AppContainer.invite_repo]):
+    invites = invite_repo.get_all_by_user(auth)
+    return jsonify(invite_schema.dump(invites, many=True))
 
 
 # --- Game ---

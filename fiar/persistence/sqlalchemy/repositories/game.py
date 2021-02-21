@@ -19,48 +19,17 @@ class GameRepo:
         session = self.db.session
         return session.query(Game).filter_by(player_o=player_o, player_x=player_x).first()
 
-    def get_all_by_player_o(self, user: User, ended: Optional[bool] = None) -> Iterable[Game]:
+    def get_all_by_player(self, user: User) -> Iterable[Game]:
         session = self.db.session
-        query = session.query(Game).filter_by(player_o=user)
-
-        if ended is not None:
-            if ended:
-                query = query.filter(game_table.c.ended_at != None)
-            else:
-                query = query.filter(game_table.c.ended_at == None)
-
-        return query
-
-    def get_all_by_player_x(self, user: User, ended: Optional[bool] = None) -> Iterable[User]:
-        session = self.db.session
-        query = session.query(Game).filter_by(player_x=user)
-
-        if ended is not None:
-            if ended:
-                query = query.filter(game_table.c.ended_at != None)
-            else:
-                query = query.filter(game_table.c.ended_at == None)
-
-        return query
-
-    def get_all_by_player(self, user: User, ended: Optional[bool] = None) -> Iterable[User]:
-        session = self.db.session
-        query = session.query(Game).filter(or_(
+        return session.query(Game).filter(or_(
             game_table.c.player_o_id == user.id,
             game_table.c.player_x_id == user.id,
         ))
 
-        if ended is not None:
-            if ended:
-                query = query.filter(game_table.c.ended_at != None)
-            else:
-                query = query.filter(game_table.c.ended_at == None)
-
-        return query
-
     def add(self, game: Game):
         session = self.db.session
         session.add(game)
+        session.flush()
 
     def delete(self, game: Game):
         session = self.db.session

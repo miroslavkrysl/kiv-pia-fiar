@@ -18,14 +18,28 @@ from fiar.services.user import UserService
 bp = Blueprint('user_api', __name__)
 
 
+# --- User ---
+
+@bp.route('/user/<int:id>', methods=['GET'])
+@inject
+def get_user(id: int,
+             user_repo: UserRepo = Provide[AppContainer.user_repo]):
+    user = user_repo.get_by_id(id)
+
+    if user is None:
+        return jsonify({'error': f'User with id {id} does not exist'}), 404
+
+    return jsonify(user_schema.dump(user))
+
+
+# --- Online users ---
+
 class UserWithFriendshipSchema(UserSchema):
     is_request_pending = fields.Boolean()
 
 
 user_with_friendship_schema = UserWithFriendshipSchema()
 
-
-# --- Online users ---
 
 @bp.route('/online-users', methods=['GET'])
 @auth_user(RouteType.API)

@@ -27,6 +27,36 @@ class UserSchema(Schema):
 user_schema = UserSchema()
 
 
+# --- Friendship ---
+
+class FriendshipSchema(Schema):
+    sender_id = fields.Int(required=True)
+    recipient_id = fields.Int(required=True)
+
+
+friendship_schema = FriendshipSchema()
+
+
+# --- Request ---
+
+class RequestSchema(Schema):
+    sender_id = fields.Int(required=True)
+    recipient_id = fields.Int(required=True)
+
+
+request_schema = RequestSchema()
+
+
+# --- Invite ---
+
+class InviteSchema(Schema):
+    sender_id = fields.Int(required=True)
+    recipient_id = fields.Int(required=True)
+
+
+invite_schema = InviteSchema()
+
+
 # --- Game ---
 
 class GameSchema(Schema):
@@ -34,8 +64,7 @@ class GameSchema(Schema):
     player_o_id = fields.Int(required=True)
     player_x_id = fields.Int(required=True)
     winner = fields.Int(allow_none=True)
-    created_at = fields.DateTime()
-    ended_at: fields.DateTime(allow_none=True)
+    on_turn = fields.Int(allow_none=True)
 
 
 game_schema = GameSchema()
@@ -49,3 +78,14 @@ class MoveSchema(Schema):
 
 
 move_schema = GameSchema()
+
+
+# --- Board ---
+
+class BoardMoveSchema:
+    side = fields.Int(required=True)
+    row = fields.Int(required=True)
+    col = fields.Int(required=True)
+
+
+board_schema = BoardMoveSchema()
