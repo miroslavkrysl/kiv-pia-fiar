@@ -66,11 +66,11 @@ class FriendshipService:
         return self.request_repo.get_by_users(sender, user) is not None
 
     def remove_pending_requests(self, user: User, friend: User):
-        fs_req1 = self.request_repo.get_by_users(user, friend)
-        fs_req2 = self.request_repo.get_by_users(friend, user)
+        req1 = self.request_repo.get_by_users(user, friend)
+        req2 = self.request_repo.get_by_users(friend, user)
 
-        if fs_req1:
-            self.request_repo.delete(fs_req1)
+        if req1:
+            self.request_repo.delete(req1)
 
-        if fs_req2:
-            self.request_repo.delete(fs_req2)
+        if req2:
+            self.request_repo.delete(req2)

@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from enum import Enum
+from datetime import datetime
 from typing import Optional
 
 
@@ -32,7 +31,7 @@ class Game:
 class Move:
     id: int = field(init=False)
     game_id: int
-    player: int
+    side: int
     row: int
     col: int
 

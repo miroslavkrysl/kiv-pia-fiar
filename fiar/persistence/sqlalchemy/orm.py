@@ -45,10 +45,10 @@ move_table = Table(
     'move', metadata,
     Column('id', Integer, primary_key=True),
     Column('game_id', Integer, ForeignKey('game.id'), nullable=False),
-    Column('player', Integer, nullable=False),
+    Column('side', Integer, nullable=False),
     Column('row', Integer, nullable=False),
     Column('col', Integer, nullable=False),
-    UniqueConstraint('game_id', 'player', 'row', 'col')
+    UniqueConstraint('game_id', 'row', 'col')
 )
 
 mapper_registry.map_imperatively(Move, move_table, properties={
