@@ -20,6 +20,10 @@
                 </table>
             </div>
             <div class="col-lg">
+                <h2 class="mx-auto">Invites</h2>
+                <table class="table table-borderless table-striped align-middle" id="invites-table">
+                    <tbody></tbody>
+                </table>
                 <h2 class="mx-auto">Games</h2>
                 <table class="table table-bordered">
                     <tbody></tbody>
@@ -69,6 +73,9 @@
                 {{/if}}
             </td>
             <td class="text-end">
+                {{#unless is_invite_pending }}
+                <a class="btn btn-sm btn-primary" data-btn-invite data-id="{{ id }}">Invite</a>
+                {{/unless }}
                 <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ id }}">Unfriend</a>
             </td>
         </tr>
@@ -91,7 +98,7 @@
         <tr>
             <td>{{ username }}</td>
             <td class="text-end">
-                {{#if recipient }}
+                {{#if is_recipient }}
                 <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Remove</a>
                 {{else}}
                 <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ id }}">Accept</a>
@@ -110,6 +117,32 @@
     </script>
     {% endraw %}
 
+    {#  Invites table templates  #}
+
+    {% raw %}
+    <script id="invite-row-template" type="text/x-handlebars-template">
+        <tr>
+            <td>{{ username }}</td>
+            <td class="text-end">
+                {{#if is_recipient }}
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Remove</a>
+                {{else}}
+                <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ id }}">Accept</a>
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Decline</a>
+                {{/if }}
+            </td>
+        </tr>
+    </script>
+    {% endraw %}
+
+    {% raw %}
+    <script id="invite-row-empty-template" type="text/x-handlebars-template">
+        <tr>
+            <td colspan="3" class="text-center">You have no invites</td>
+        </tr>
+    </script>
+    {% endraw %}
+
 {% endblock %}
 
 {% block scripts %}
@@ -124,6 +157,8 @@
         let friend_row_empty_template = Handlebars.compile(document.getElementById("friend-row-empty-template").innerHTML);
         let request_row_template = Handlebars.compile(document.getElementById("request-row-template").innerHTML);
         let request_row_empty_template = Handlebars.compile(document.getElementById("request-row-empty-template").innerHTML);
+        let invite_row_template = Handlebars.compile(document.getElementById("invite-row-template").innerHTML);
+        let invite_row_empty_template = Handlebars.compile(document.getElementById("invite-row-empty-template").innerHTML);
 
         function load_friends() {
             let tbody = $("#friends-table").find("tbody");
@@ -156,6 +191,10 @@
                     tbody.find("[data-btn-unfriend]").click(function (event) {
                         let id = $(this).attr('data-id');
                         remove_friendship(id);
+                    });
+                    tbody.find("[data-btn-invite]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        add_invite(id);
                     });
                 });
             });
@@ -194,18 +233,18 @@
 
                 $.each(requests, function (key, request) {
                     let id;
-                    let recipient;
+                    let is_recipient;
 
                     if ($app.this_user_id === request.sender_id) {
                         id = request.recipient_id;
-                        recipient = true;
+                        is_recipient = true;
                     } else {
                         id = request.sender_id;
-                        recipient = false;
+                        is_recipient = false;
                     }
 
                     let call = get_user(id, function (user) {
-                        user.sender = recipient;
+                        user.is_recipient = is_recipient;
                         requests_users.push(user)
                     });
                     calls.push(call)
@@ -231,6 +270,57 @@
                     tbody.find("[data-btn-decline]").click(function (event) {
                         let id = $(this).attr('data-id');
                         remove_request(id);
+                    });
+                });
+            });
+        }
+
+        function load_invites() {
+            let tbody = $("#invites-table").find("tbody");
+
+            get_invites(function (invites) {
+                let invites_users = []
+                let calls = [];
+
+                $.each(invites, function (key, invite) {
+                    let id;
+                    let is_recipient;
+
+                    if ($app.this_user_id === invite.sender_id) {
+                        id = invite.recipient_id;
+                        is_recipient = true;
+                    } else {
+                        id = invite.sender_id;
+                        is_recipient = false;
+                    }
+
+                    let call = get_user(id, function (user) {
+                        user.is_recipient = is_recipient;
+                        invites_users.push(user)
+                    });
+                    calls.push(call)
+                });
+
+                $.when.apply($, calls).then(function () {
+                    tbody.empty()
+
+                    if (invites_users.length === 0) {
+                        let html = invite_row_empty_template(null);
+                        tbody.append(html);
+                    } else {
+                        $.each(invites_users, function (key, user) {
+                            let html = invite_row_template(user);
+                            tbody.append(html);
+                        });
+                    }
+
+                    tbody.find("[data-btn-accept]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        //accept_invite(id);
+                    });
+                    tbody.find("[data-btn-decline]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        deny_invite(id);
                     });
                 });
             });
@@ -263,6 +353,7 @@
             load_friends();
             load_users();
             load_requests();
+            load_invites();
 
             setInterval(function () {
                 load_friends();

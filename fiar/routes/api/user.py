@@ -11,6 +11,7 @@ from fiar.di.container import AppContainer
 from fiar.routes.decorators import RouteType, auth_user
 from fiar.services.auth import AuthService
 from fiar.services.friendship import FriendshipService
+from fiar.services.game import GameService
 from fiar.services.mail import MailService
 from fiar.services.pswd_token import PswdTokenService
 from fiar.services.user import UserService
@@ -20,16 +21,28 @@ bp = Blueprint('user_api', __name__)
 
 # --- User ---
 
+class UserWithInviteSchema(UserSchema):
+    is_invite_pending = fields.Boolean()
+
+
+user_with_invite_schema = UserWithInviteSchema()
+
+
 @bp.route('/user/<int:id>', methods=['GET'])
+@auth_user(RouteType.API)
 @inject
-def get_user(id: int,
-             user_repo: UserRepo = Provide[AppContainer.user_repo]):
+def get_user(auth: User,
+             id: int,
+             user_repo: UserRepo = Provide[AppContainer.user_repo],
+             game_service: GameService = Provide[AppContainer.game_service]):
     user = user_repo.get_by_id(id)
 
     if user is None:
         return jsonify({'error': f'User with id {id} does not exist'}), 404
 
-    return jsonify(user_schema.dump(user))
+    user.is_invite_pending = game_service.is_invite_pending(auth, user)
+
+    return jsonify(user_with_invite_schema.dump(user))
 
 
 # --- Online users ---

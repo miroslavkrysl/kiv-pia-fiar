@@ -57,6 +57,46 @@ function remove_friendship(friend_id, success=null, error=null) {
     });
 }
 
+function add_invite(opponent_id, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.invite.POST + opponent_id,
+        type: 'post',
+        dataType: 'json',
+        success: success,
+        error: error
+    });
+}
+
+function remove_invite(opponent_id, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.invite.DELETE + opponent_id,
+        type: 'delete',
+        dataType: 'json',
+        success: success,
+        error: error
+    });
+}
+
+function accept_invite(friend_id, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.invite.POST + friend_id,
+        type: 'put',
+        dataType: 'json',
+        success: success,
+        error: error
+    });
+}
+
+function deny_invite(friend_id, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.invite.DELETE + friend_id,
+        type: 'delete',
+        dataType: 'json',
+        success: success,
+        error: error
+    });
+}
+
 function get_user(id, success=null) {
     return $.getJSON($app.api.user.GET + id, null, success);
 }
