@@ -74,7 +74,7 @@ def post_game(opponent_id: int,
     opponent = user_repo.get_by_id(opponent_id)
 
     if opponent is None:
-        return jsonify({'error': f'User with id {opponent_id} does not exist'}), 400
+        return jsonify({'error': f'User with id {opponent_id} does not exist'}), 404
 
     if not game_service.has_received_invite(auth, opponent):
         return jsonify({'error': 'Invite not received from the other user.'}), 409
@@ -84,13 +84,13 @@ def post_game(opponent_id: int,
     return jsonify(game_schema.dump(game)), 201
 
 
-@bp.route('/end/<int:game_id>', methods=['PUT'])
+@bp.route('/surrender/<int:game_id>', methods=['POST'])
 @auth_user(RouteType.API)
 @inject
-def put_end(game_id: int,
-            auth: User,
-            game_repo: GameRepo = Provide[AppContainer.game_repo],
-            game_service: GameService = Provide[AppContainer.game_service]):
+def post_surrender(game_id: int,
+                   auth: User,
+                   game_repo: GameRepo = Provide[AppContainer.game_repo],
+                   game_service: GameService = Provide[AppContainer.game_service]):
     game = game_repo.get_by_id(game_id)
 
     if game is None:
@@ -101,22 +101,22 @@ def put_end(game_id: int,
         return jsonify({'error': 'You are not in this game.'}), 403
 
     if game_service.is_ended(game):
-        return jsonify(), 200
+        return jsonify({'error': 'Already ended.'}), 412
 
     game_service.surrender(game, side)
 
-    return jsonify(), 201
+    return jsonify(), 200
 
 
 # --- Move ---
 
-@bp.route('/move/<int:game_id>', methods=['PUT'])
+@bp.route('/move/<int:game_id>', methods=['POST'])
 @auth_user(RouteType.API)
 @inject
-def put_move(game_id: int,
-             auth: User,
-             game_repo: GameRepo = Provide[AppContainer.game_repo],
-             game_service: GameService = Provide[AppContainer.game_service]):
+def post_move(game_id: int,
+              auth: User,
+              game_repo: GameRepo = Provide[AppContainer.game_repo],
+              game_service: GameService = Provide[AppContainer.game_service]):
     game = game_repo.get_by_id(game_id)
 
     if game is None:
@@ -147,67 +147,45 @@ def put_move(game_id: int,
 
     return jsonify({'result': result.value}), code
 
-#
-#
-# @bp.route('/friendship/<int:id>', methods=['DELETE'])
-# @auth_user(RouteType.API)
-# @inject
-# def delete_friendship(id: int,
-#                       auth: User,
-#                       user_repo: UserRepo = Provide[AppContainer.user_repo],
-#                       friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
-#     friend = user_repo.get_by_id(id)
-#
-#     if friend is None:
-#         return jsonify({'error': f'User with {id} does not exist'}), 404
-#
-#     if friendship_service.are_friends(auth, friend):
-#         friendship_service.remove_friendship(auth, friend)
-#
-#     return jsonify(), 200
-#
-#
-# # --- Invite ---
-#
-# @bp.route('/invite/<int:id>', methods=['PUT'])
-# @auth_user(RouteType.API)
-# @inject
-# def put_request(id: int,
-#                 auth: User,
-#                 user_repo: UserRepo = Provide[AppContainer.user_repo],
-#                 game_service: GameService = Provide[AppContainer.game_service]):
-#     friend = user_repo.get_by_id(id)
-#
-#     if friend is None:
-#         return jsonify({'error': f'User with id {id} does not exist'}), 400
-#
-#     if friendship_service.has_received_request(auth, friend):
-#         return jsonify({'error': 'Already requested from the other user'}), 409
-#
-#     if friendship_service.are_friends(auth, friend):
-#         return jsonify({'error': 'Already friends'}), 409
-#
-#     if friendship_service.has_received_request(friend, auth):
-#         return jsonify(), 200
-#
-#     friendship_service.accept_friendship(auth, friend)
-#
-#     return jsonify(), 201
-#
-#
-# @bp.route('/request/<int:id>', methods=['DELETE'])
-# @auth_user(RouteType.API)
-# @inject
-# def delete_request(id: int,
-#                    auth: User,
-#                    user_repo: UserRepo = Provide[AppContainer.user_repo],
-#                    friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
-#     friend = user_repo.get_by_id(id)
-#
-#     if friend is None:
-#         return jsonify({'error': f'User with {id} does not exist'}), 404
-#
-#     if friendship_service.is_request_pending(auth, friend):
-#         friendship_service.deny_friendship(auth, friend)
-#
-#     return jsonify(), 200
+
+# --- Invite ---
+
+@bp.route('/invite/<int:opponent_id>', methods=['POST'])
+@auth_user(RouteType.API)
+@inject
+def post_invite(opponent_id: int,
+                auth: User,
+                user_repo: UserRepo = Provide[AppContainer.user_repo],
+                game_service: GameService = Provide[AppContainer.game_service]):
+    opponent = user_repo.get_by_id(opponent_id)
+
+    if opponent is None:
+        return jsonify({'error': f'User with id {opponent_id} does not exist'}), 400
+
+    if game_service.has_received_invite(auth, opponent):
+        return jsonify({'error': 'Already requested from the other user'}), 409
+
+    if game_service.has_received_invite(opponent, auth):
+        return jsonify(), 200
+
+    game_service.create_invite(auth, opponent)
+
+    return jsonify(), 201
+
+
+@bp.route('/invite/<int:opponent_id>', methods=['DELETE'])
+@auth_user(RouteType.API)
+@inject
+def delete_request(opponent_id: int,
+                   auth: User,
+                   user_repo: UserRepo = Provide[AppContainer.user_repo],
+                   game_service: GameService = Provide[AppContainer.game_service]):
+    opponent = user_repo.get_by_id(opponent_id)
+
+    if opponent is None:
+        return jsonify({'error': f'User with {opponent_id} does not exist'}), 404
+
+    if game_service.is_invite_pending(auth, opponent):
+        game_service.remove_pending_invites(auth, opponent)
+
+    return jsonify(), 200

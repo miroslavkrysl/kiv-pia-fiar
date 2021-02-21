@@ -1,8 +1,6 @@
-from datetime import datetime
-from enum import Enum, auto
 from typing import Optional
 
-from fiar.data.models import User, Friendship, Game, Move, MoveResult, SIDE_DRAW, SIDE_O, SIDE_X
+from fiar.data.models import User, Game, Move, MoveResult, SIDE_DRAW, SIDE_O, SIDE_X, Invite
 from fiar.persistence.sqlalchemy.repositories.game import GameRepo
 from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.move import MoveRepo
@@ -86,13 +84,14 @@ class GameService:
 
         return game
 
-    def remove_invite(self, user: User, opponent: User):
+    def create_invite(self, user: User, opponent: User):
         """
-        Remove an invite. Removes pending invites between the two users.
-        :param user: User
-        :param opponent: Opponent - who invites.
+        Create an invite from user to opponent.
+        :param user: User.
+        :param opponent: Opponent.
         """
-        self.remove_pending_invites(user, opponent)
+        invite = Invite(user.id, opponent.id)
+        self.invite_repo.add(invite)
 
     def get_player_side(self, game: Game, player: User) -> Optional[int]:
         """
@@ -145,9 +144,14 @@ class GameService:
         """
         return self.invite_repo.get_by_users(sender, user) is not None
 
-    def remove_pending_invites(self, user: User, friend: User):
-        invite1 = self.invite_repo.get_by_users(user, friend)
-        invite2 = self.invite_repo.get_by_users(friend, user)
+    def remove_pending_invites(self, user: User, opponent: User):
+        """
+        Remove pending invites between the two users.
+        :param user: User
+        :param opponent: Opponent.
+        """
+        invite1 = self.invite_repo.get_by_users(user, opponent)
+        invite2 = self.invite_repo.get_by_users(opponent, user)
 
         if invite1:
             self.invite_repo.delete(invite1)
