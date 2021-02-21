@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-lg">
                 <h2 class="mx-auto">Friendship requests</h2>
-                <table class="table table-borderless table-striped align-middle" id="friendship-requests-table">
+                <table class="table table-borderless table-striped align-middle" id="requests-table">
                     <tbody></tbody>
                 </table>
                 <h2 class="mx-auto">Friends</h2>
@@ -62,7 +62,7 @@
         <tr>
             <td>{{ username }}</td>
             <td>
-                {%#if is_online %}
+                {{#if is_online }}
                 <span class="text-success">online</span>
                 {{else}}
                 <span class="text-danger">offline</span>
@@ -86,55 +86,35 @@
 
     {#  Friend requests table templates  #}
 
+    {% raw %}
+    <script id="request-row-template" type="text/x-handlebars-template">
+        <tr>
+            <td>{{ username }}</td>
+            <td class="text-end">
+                {{#if recipient }}
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Remove</a>
+                {{else}}
+                <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ id }}">Accept</a>
+                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Decline</a>
+                {{/if }}
+            </td>
+        </tr>
+    </script>
+    {% endraw %}
+
+    {% raw %}
+    <script id="request-row-empty-template" type="text/x-handlebars-template">
+        <tr>
+            <td colspan="3" class="text-center">You have no friendship requests</td>
+        </tr>
+    </script>
+    {% endraw %}
+
 {% endblock %}
 
 {% block scripts %}
     <script>
         let lobby_socket = io('/lobby');
-
-        // --- REST calls ---
-        /*
-
-        function add_friend_request(friend_id) {
-            $.ajax({
-                {#url: '{{ url_for('friendship.request_api') }}',#}
-                type: 'post',
-                dataType: 'json',
-                data: {
-                    id: friend_id
-                }
-            });
-        }
-
-        function remove_friend_request(id) {
-            $.ajax({
-                {#url: '{{ url_for('friendship.request_api') }}' + id,#}
-                type: 'delete',
-                dataType: 'json'
-            });
-        }
-
-        function add_friendship(friend_id) {
-            $.ajax({
-                {#url: '{{ url_for('friendship.friendship_api') }}',#}
-                type: 'post',
-                dataType: 'json',
-                data: {
-                    id: friend_id
-                }
-            });
-        }
-
-
-        function remove_friendship(id) {
-            $.ajax({
-                {#url: '{{ url_for('friendship.friendship_api') }}' + id,#}
-                type: 'delete',
-                dataType: 'json'
-            });
-        }
-
-        */
 
         // --- loads ---
 
@@ -142,26 +122,41 @@
         let user_row_empty_template = Handlebars.compile(document.getElementById("user-row-empty-template").innerHTML);
         let friend_row_template = Handlebars.compile(document.getElementById("friend-row-template").innerHTML);
         let friend_row_empty_template = Handlebars.compile(document.getElementById("friend-row-empty-template").innerHTML);
+        let request_row_template = Handlebars.compile(document.getElementById("request-row-template").innerHTML);
+        let request_row_empty_template = Handlebars.compile(document.getElementById("request-row-empty-template").innerHTML);
 
         function load_friends() {
             let tbody = $("#friends-table").find("tbody");
 
-            $.getJSON("{{ url_for('friendship_api.get_friends') }}", function (data) {
-                tbody.empty()
+            get_friendships(function (friendships) {
+                let friends = []
+                let calls = [];
 
-                if (data.length === 0) {
-                    let html = friend_row_empty_template(null);
-                    tbody.append(html);
-                } else {
-                    $.each(data, function (key, friend) {
-                        let html = friend_row_template(friend);
-                        tbody.append(html);
+                $.each(friendships, function (key, friendship) {
+                    let call = get_user(friendship.recipient_id, function (user) {
+                        friends.push(user)
                     });
-                }
+                    calls.push(call)
+                });
 
-                tbody.find("[data-btn-unfriend]").click(function (event) {
-                    let id = $(this).attr('data-id');
-                    //remove_friendship(id);
+                $.when.apply($, calls).then(function () {
+                    tbody.empty()
+
+                    if (friends.length === 0) {
+                        let html = friend_row_empty_template(null);
+                        tbody.append(html);
+                    } else {
+                        $.each(friends, function (key, friend) {
+                            friend.is_online = is_online(friend);
+                            let html = friend_row_template(friend);
+                            tbody.append(html);
+                        });
+                    }
+
+                    tbody.find("[data-btn-unfriend]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        remove_friendship(id);
+                    });
                 });
             });
         }
@@ -169,56 +164,92 @@
         function load_users() {
             let tbody = $("#users-table").find("tbody");
 
-            $.getJSON("{{ url_for('user_api.get_online_users') }}", function (data) {
+            get_online_users(function (users) {
                 tbody.empty()
 
-                if (data.length === 0) {
+                if (users.length === 0) {
                     let html = user_row_empty_template(null);
                     tbody.append(html);
                 } else {
-                    $.each(data, function (key, user) {
-                        let html = user_row_template(user);
+                    $.each(users, function (key, friend) {
+                        let html = user_row_template(friend);
                         tbody.append(html);
                     });
                 }
 
                 tbody.find("[data-btn-friend]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    //add_friend_request(id);
+                    add_request(id);
                 });
             });
         }
 
 
-        {#function load_requests() {#}
-        {#    let table = $("#friendship-requests-table");#}
-        {##}
-        {#            table.find("tbody").load("{{ url_for('lobby.friendship_requests_rows') }}", function () {#}
-        {#                table.find("[data-btn-accept]").click(function (event) {#}
-        {#                    let id = $(this).attr('data-id');#}
-        {#                    add_friendship(id);#}
-        {#                });#}
-        {#                table.find("[data-btn-decline]").click(function (event) {#}
-        {#                    let id = $(this).attr('data-id');#}
-        {#                    remove_friend_request(id);#}
-        {#                });#}
-        {#            });#}
-        {#        }#}
+        function load_requests() {
+            let tbody = $("#requests-table").find("tbody");
+
+            get_requests(function (requests) {
+                let requests_users = []
+                let calls = [];
+
+                $.each(requests, function (key, request) {
+                    let id;
+                    let recipient;
+
+                    if ($app.this_user_id === request.sender_id) {
+                        id = request.recipient_id;
+                        recipient = true;
+                    } else {
+                        id = request.sender_id;
+                        recipient = false;
+                    }
+
+                    let call = get_user(id, function (user) {
+                        user.sender = recipient;
+                        requests_users.push(user)
+                    });
+                    calls.push(call)
+                });
+
+                $.when.apply($, calls).then(function () {
+                    tbody.empty()
+
+                    if (requests_users.length === 0) {
+                        let html = request_row_empty_template(null);
+                        tbody.append(html);
+                    } else {
+                        $.each(requests_users, function (key, user) {
+                            let html = request_row_template(user);
+                            tbody.append(html);
+                        });
+                    }
+
+                    tbody.find("[data-btn-accept]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        add_friendship(id);
+                    });
+                    tbody.find("[data-btn-decline]").click(function (event) {
+                        let id = $(this).attr('data-id');
+                        remove_request(id);
+                    });
+                });
+            });
+        }
 
         // --- Socket ---
 
         lobby_socket.on('new_request', function () {
-            {#load_requests();#}
+            load_requests();
             load_users();
         });
 
         lobby_socket.on('request_refused', function () {
-            {#load_requests();#}
+            load_requests();
             load_users();
         });
 
         lobby_socket.on('new_friend', function () {
-            {#load_requests();#}
+            load_requests();
             load_friends();
             load_users();
         });
@@ -231,7 +262,7 @@
         $(document).ready(function (event) {
             load_friends();
             load_users();
-            {#load_requests();#}
+            load_requests();
 
             setInterval(function () {
                 load_friends();

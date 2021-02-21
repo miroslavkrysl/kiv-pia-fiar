@@ -150,7 +150,7 @@ def post_invite(opponent_id: int,
 @bp.route('/invite/<int:opponent_id>', methods=['DELETE'])
 @auth_user(RouteType.API)
 @inject
-def delete_request(opponent_id: int,
+def delete_invite(opponent_id: int,
                    auth: User,
                    user_repo: UserRepo = Provide[AppContainer.user_repo],
                    game_service: GameService = Provide[AppContainer.game_service]):

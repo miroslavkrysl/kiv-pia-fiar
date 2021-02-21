@@ -25,22 +25,13 @@ class FriendshipService:
                or self.friendship_repo.get_by_users(friend, user) is not None
 
     def accept_friendship(self, user: User, friend: User):
-        # make friendship bidirectional
-        fs1 = Friendship(user.id, friend.id)
-        fs2 = Friendship(friend.id, user.id)
-
-        self.friendship_repo.add(fs1)
-        self.friendship_repo.add(fs2)
-
+        fs = Friendship(user.id, friend.id)
+        self.friendship_repo.add(fs)
         self.remove_pending_requests(user, friend)
 
     def remove_friendship(self, user: User, friend: User):
-        # delete bidirectional friendship
-        fs1 = self.friendship_repo.get_by_users(user, friend)
-        fs2 = self.friendship_repo.get_by_users(friend, user)
-
-        self.friendship_repo.delete(fs1)
-        self.friendship_repo.delete(fs2)
+        fs = self.friendship_repo.get_by_users(user, friend)
+        self.friendship_repo.delete(fs)
 
     def is_request_pending(self, user: User, friend: User) -> bool:
         """

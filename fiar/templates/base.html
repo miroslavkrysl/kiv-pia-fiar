@@ -32,27 +32,16 @@
                     <a class="btn btn-primary me-2" href="{{ url_for('user.login') }}">Login</a>
                 </li>
                 <li class="nav-item">
-                    <a class="btn btn-outline-primary" href="{{ url_for('user.register') }}">Register</a>
+                    <a class="btn btn-outline-primary" href="{{ url_for('user.registration') }}">Register</a>
                 </li>
             {% endif %}
         </ul>
     </div>
 </header>
 
-<div class="container" id="message-box">
-    <template id="message-template">
-        <div class="alert"></div>
-    </template>
-</div>
-
 {% block content %}{% endblock %}
 
 {# --- SCRIPTS --- #}
-
-<script type=text/javascript>
-    // set script uri root for ajax calls
-    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
 
 <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/bootstrap.bundle.min.js') }}"></script>
@@ -61,24 +50,18 @@
 <script src="{{ url_for('static', filename='lib/zxcvbn.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
 
+{# include JS vars#}
+{% include 'vars.html' %}
 
-
-{# Message box script #}
-<script>
-</script>
+{# include app functions #}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 {# Logout script #}
 <script>
     $("#logout").click(function (event) {
         event.preventDefault();
-
-        $.ajax({
-            url: '{{ url_for('user_api.delete_login') }}',
-            type: 'delete',
-            dataType: 'json',
-            success: function (response) {
-                $(location).attr('href', '/');
-            }
+        logout(function (response) {
+            $(location).attr('href', '/');
         });
     });
 </script>

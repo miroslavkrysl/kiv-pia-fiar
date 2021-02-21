@@ -70,8 +70,3 @@ class UserService:
 
     def email_exists(self, email: str) -> bool:
         return self.user_repo.get_by_email(email) is not None
-
-    def is_online(self, user: User) -> bool:
-        now = datetime.now()
-        threshold = now - self.online_timeout
-        return user.last_active_at > threshold
