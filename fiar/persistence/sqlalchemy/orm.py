@@ -1,5 +1,5 @@
-from sqlalchemy import MetaData, Table, Column, DateTime, Integer, String, Boolean, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import mapper, relationship
+from sqlalchemy import MetaData, Table, Column, DateTime, Integer, String, Boolean, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm.decl_api import registry
 
 from fiar.data.models import User, Game, Move, Friendship, Request, Invite
@@ -29,8 +29,7 @@ game_table = Table(
     Column('id', Integer, primary_key=True),
     Column('player_o_id', Integer, ForeignKey('user.id'), nullable=False),
     Column('player_x_id', Integer, ForeignKey('user.id'), nullable=False),
-    Column('created_at', DateTime, nullable=False),
-    Column('ended_at', DateTime),
+    Column('on_turn', Integer),
     Column('winner', Integer)
 )
 

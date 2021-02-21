@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum, auto
 from typing import Optional
 
-from fiar.data.models import User, Friendship, Game, Move, MoveResult
+from fiar.data.models import User, Friendship, Game, Move, MoveResult, SIDE_DRAW, SIDE_O, SIDE_X
 from fiar.persistence.sqlalchemy.repositories.game import GameRepo
 from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.move import MoveRepo
@@ -25,15 +25,14 @@ class GameService:
         self.move_repo = move_repo
         self.board_size = board_size
 
-    def give_up(self, player: int, game: Game):
+    def give_up(self, side: int, game: Game):
         """
         Give up game. Sets ended_at datetime to now and winner to other player.
-        :param player: Player who gives up - 0 for O, 1 for X.
+        :param side: Player who gives up - 0 for O, 1 for X.
         :param game: Game.
         """
-        assert player == 0 or player == 1
-        game.winner = 0 if player == 1 else 1
-        game.ended_at = datetime.now()
+        assert side == SIDE_O or side == SIDE_X
+        game.winner = SIDE_O if side == SIDE_X else SIDE_X
 
     def do_move(self, game: Game, side: int, row: int, col: int) -> MoveResult:
         """
@@ -44,24 +43,32 @@ class GameService:
         :param col: Col number.
         :return: MoveResult.
         """
-        assert side == 0 or side == 1
+        assert side == SIDE_O or side == SIDE_X
 
+        # check cell position validity
         if row < 0 or row >= self.board_size:
-            return MoveResult.INVALID
+            return MoveResult.OUT
 
         if col < 0 or col >= self.board_size:
-            return MoveResult.INVALID
+            return MoveResult.OUT
 
         if self.is_cell_occupied(game, row, col):
-            return MoveResult.INVALID
+            return MoveResult.OCCUPIED
 
+        # create move
         move = Move(game.id, side, row, col)
         self.move_repo.add(move)
 
+        # switch user on turn
+        game.on_turn = SIDE_O if side == SIDE_X else SIDE_X
+
+        # check end game conditions
         if self.check_fiar(game, side, row, col):
+            game.winner = side
             return MoveResult.WINNER
 
         if self.is_full(game):
+            game.winner = SIDE_DRAW
             return MoveResult.DRAW
 
         return MoveResult.OK
@@ -87,19 +94,37 @@ class GameService:
         """
         self.remove_pending_invites(user, opponent)
 
-    def get_player_side(self, player: User, game: Game) -> Optional[int]:
+    def get_player_side(self, game: Game, player: User) -> Optional[int]:
         """
         Get the player side - 0 for O, 1 for X.
-        :param player: Player.
         :param game: Game.
+        :param player: Player.
         :return: The player side number or None if player is not in game.
         """
         if player.id == game.player_o_id:
-            return 0
+            return SIDE_O
         elif player.id == game.player_x_id:
-            return 1
+            return SIDE_X
         else:
             return None
+
+    def is_on_turn(self, game: Game, side: int) -> bool:
+        """
+        Check if the player is on turn.
+        :param game: Game.
+        :param side: Side - 0 for O, 1 for X.
+        :return: True if on turn, False otherwise.
+        """
+        assert side == SIDE_O or side == SIDE_X
+        return side == game.on_turn
+
+    def is_ended(self, game: Game) -> bool:
+        """
+        Check if the game is ended.
+        :param game: Game.
+        :return: True if ended, False otherwise.
+        """
+        return game.winner is not None
 
     def is_invite_pending(self, user: User, opponent: User) -> bool:
         """
@@ -150,6 +175,8 @@ class GameService:
         :param game: Game.
         :return: True if is, false otherwise.
         """
+        assert side == SIDE_O or side == SIDE_X
+
         # horizontal check
         in_line = 0
         for c in range(col - 4, col + 5):

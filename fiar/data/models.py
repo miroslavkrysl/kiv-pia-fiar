@@ -23,9 +23,8 @@ class Game:
     id: int = field(init=False)
     player_o_id: int
     player_x_id: int
+    on_turn: int = field(default=0)
     winner: Optional[int] = field(default=None)
-    created_at: datetime = field(default_factory=datetime.now)
-    ended_at: Optional[datetime] = field(default=None)
 
 
 @dataclass
@@ -57,6 +56,12 @@ class Friendship:
 
 class MoveResult(Enum):
     OK = 'ok'
-    INVALID = 'invalid'
+    OUT = 'out'
+    OCCUPIED = 'occupied'
     DRAW = 'draw'
     WINNER = 'win'
+
+
+SIDE_O = 0
+SIDE_X = 1
+SIDE_DRAW = 2

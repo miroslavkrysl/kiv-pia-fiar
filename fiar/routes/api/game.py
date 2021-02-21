@@ -1,4 +1,14 @@
-from flask import Blueprint
+from dependency_injector.wiring import inject, Provide
+from flask import Blueprint, jsonify, request
+from marshmallow import ValidationError
+
+from fiar.data.models import User, MoveResult
+from fiar.data.schemas import game_schema, move_schema
+from fiar.di.container import AppContainer
+from fiar.persistence.sqlalchemy.repositories.game import GameRepo
+from fiar.persistence.sqlalchemy.repositories.user import UserRepo
+from fiar.routes.decorators import auth_user, RouteType
+from fiar.services.game import GameService
 
 bp = Blueprint('game_api', __name__)
 
@@ -54,27 +64,65 @@ bp = Blueprint('game_api', __name__)
 
 # --- Game ---
 
-# @bp.route('/friendship/<int:id>', methods=['PUT'])
-# @auth_user(RouteType.API)
-# @inject
-# def put_friendship(id: int,
-#                    auth: User,
-#                    user_repo: UserRepo = Provide[AppContainer.user_repo],
-#                    friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
-#     friend = user_repo.get_by_id(id)
-#
-#     if friend is None:
-#         return jsonify({'error': f'User with id {id} does not exist'}), 400
-#
-#     if friendship_service.are_friends(auth, friend):
-#         return jsonify(), 200
-#
-#     if not friendship_service.has_received_request(auth, friend):
-#         return jsonify({'error': 'Friendship not requested from the other user.'}), 409
-#
-#     friendship_service.accept_friendship(auth, friend)
-#
-#     return jsonify(), 201
+@bp.route('/game/<int:opponent_id>', methods=['POST'])
+@auth_user(RouteType.API)
+@inject
+def post_game(opponent_id: int,
+              auth: User,
+              user_repo: UserRepo = Provide[AppContainer.user_repo],
+              game_service: GameService = Provide[AppContainer.game_service]):
+    opponent = user_repo.get_by_id(opponent_id)
+
+    if opponent is None:
+        return jsonify({'error': f'User with id {opponent_id} does not exist'}), 400
+
+    if not game_service.has_received_invite(auth, opponent):
+        return jsonify({'error': 'Invite not received from the other user.'}), 409
+
+    game = game_service.accept_invite(auth, opponent)
+
+    return jsonify(game_schema.dump(game)), 201
+
+
+# --- Move ---
+
+@bp.route('/move/<int:game_id>', methods=['PUT'])
+@auth_user(RouteType.API)
+@inject
+def put_move(game_id: int,
+             auth: User,
+             game_repo: GameRepo = Provide[AppContainer.game_repo],
+             game_service: GameService = Provide[AppContainer.game_service]):
+    game = game_repo.get_by_id(game_id)
+
+    if game is None:
+        return jsonify({'error': f'User with {game_id} does not exist'}), 404
+
+    try:
+        data = move_schema.load(request.form)
+    except ValidationError as err:
+        return jsonify({'errors': err.messages}), 400
+
+    side = game_service.get_player_side(game, auth)
+    if side is None:
+        return jsonify({'error': 'You are not in this game.'}), 403
+
+    if game_service.is_ended(game):
+        return jsonify({'error': 'Game is ended.'}), 412
+
+    if not game_service.is_on_turn(game, side):
+        return jsonify({'error': 'You are not on turn.'}), 412
+
+    result = game_service.do_move(game, side, data['row'], data['col'])
+    if result == MoveResult.OUT:
+        code = 400
+    elif result == MoveResult.OCCUPIED:
+        code = 409
+    else:
+        code = 201
+
+    return jsonify({'result': result.value}), code
+
 #
 #
 # @bp.route('/friendship/<int:id>', methods=['DELETE'])

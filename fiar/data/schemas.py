@@ -44,9 +44,6 @@ game_schema = GameSchema()
 # --- Move ---
 
 class MoveSchema(Schema):
-    side = fields.Int(required=True, validate=[
-        validate.OneOf([0, 1])
-    ])
     row = fields.Int(required=True)
     col = fields.Int(required=True)
 
