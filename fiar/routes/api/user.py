@@ -22,7 +22,7 @@ bp = Blueprint('user_api', __name__)
 # --- User ---
 
 class UserWithInviteSchema(UserSchema):
-    is_invite_pending = fields.Boolean()
+    has_sent_invite = fields.Boolean()
 
 
 user_with_invite_schema = UserWithInviteSchema()
@@ -40,36 +40,9 @@ def get_user(auth: User,
     if user is None:
         return jsonify({'error': f'User with id {id} does not exist'}), 404
 
-    user.is_invite_pending = game_service.is_invite_pending(auth, user)
+    user.has_sent_invite = game_service.has_received_invite(auth, user)
 
     return jsonify(user_with_invite_schema.dump(user))
-
-
-# --- Online users ---
-
-class UserWithFriendshipSchema(UserSchema):
-    is_request_pending = fields.Boolean()
-
-
-user_with_friendship_schema = UserWithFriendshipSchema()
-
-
-@bp.route('/online-users', methods=['GET'])
-@auth_user(RouteType.API)
-@inject
-def get_online_users(auth: User,
-                     user_repo: UserRepo = Provide[AppContainer.user_repo],
-                     friendship_service: FriendshipService = Provide[AppContainer.friendship_service]):
-    users = user_repo.get_all_online(timedelta(seconds=current_app.config['USER']['ONLINE_TIMEOUT']))
-    users = list(filter(
-        lambda u: not friendship_service.are_friends(auth, u)
-                  and auth != u,
-        users))
-
-    for user in users:
-        user.is_request_pending = friendship_service.is_request_pending(auth, user)
-
-    return jsonify(user_with_friendship_schema.dump(users, many=True))
 
 
 # --- Registration ---

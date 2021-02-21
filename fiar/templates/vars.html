@@ -1,21 +1,14 @@
 <script type="application/javascript">
     $app = {
-        this_user_id: {{ auth_user.id | tojson }},
-        online_timeout: {{ config.USER.ONLINE_TIMEOUT | tojson }},
+        this_user_id: {% if auth_user %}{{ auth_user.id | tojson }}{% else %}{{ null }}{% endif %},
         api: {
             friendship: {
                 PUT: "{{ url_for('friendship_api.put_friendship', friend_id=0)[:-1] }}",
                 DELETE: "{{ url_for('friendship_api.delete_friendship', friend_id=0)[:-1] }}"
             },
-            friendships: {
-                GET: "{{ url_for('friendship_api.get_friendships') }}"
-            },
             request: {
                 POST: "{{ url_for('friendship_api.post_request', friend_id=0)[:-1] }}",
                 DELETE: "{{ url_for('friendship_api.delete_request', friend_id=0)[:-1] }}"
-            },
-            requests: {
-                GET: "{{ url_for('friendship_api.get_requests') }}"
             },
             pswd_reset: {
                 PUT: "{{ url_for('user_api.put_pswd_reset', token='') }}"
@@ -30,24 +23,12 @@
             registration: {
                 POST: "{{ url_for('user_api.post_registration') }}"
             },
-            user: {
-                GET: "{{ url_for('user_api.get_user', id=0)[:-1] }}"
-            },
-            online_users: {
-                GET: "{{ url_for('user_api.get_online_users') }}"
-            },
             invite: {
                 POST: "{{ url_for('game_api.post_invite', opponent_id=0)[:-1] }}",
                 DELETE: "{{ url_for('game_api.delete_invite', opponent_id=0)[:-1] }}"
             },
-            invites: {
-                GET: "{{ url_for('game_api.get_invites') }}"
-            },
             game: {
                 POST: "{{ url_for('game_api.post_game', opponent_id=0)[:-1] }}"
-            },
-            games: {
-                GET: "{{ url_for('game_api.get_games') }}"
             },
             move: {
                 POST: "{{ url_for('game_api.post_move', game_id=0)[:-1] }}"

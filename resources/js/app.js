@@ -1,10 +1,3 @@
-function is_online(user) {
-    let last_active = new Date(user.last_active_at);
-    let limit = new Date();
-    limit.setSeconds(last_active.getSeconds() + $app.online_timeout);
-    return limit > new Date();
-}
-
 // --- REST calls ---
 
 function logout(success=null, error=null) {
@@ -79,7 +72,7 @@ function remove_invite(opponent_id, success=null, error=null) {
 
 function accept_invite(friend_id, success=null, error=null) {
     return $.ajax({
-        url: $app.api.invite.POST + friend_id,
+        url: $app.api.game.POST + friend_id,
         type: 'put',
         dataType: 'json',
         success: success,
@@ -87,7 +80,7 @@ function accept_invite(friend_id, success=null, error=null) {
     });
 }
 
-function deny_invite(friend_id, success=null, error=null) {
+function refuse_invite(friend_id, success=null, error=null) {
     return $.ajax({
         url: $app.api.invite.DELETE + friend_id,
         type: 'delete',
@@ -95,28 +88,4 @@ function deny_invite(friend_id, success=null, error=null) {
         success: success,
         error: error
     });
-}
-
-function get_user(id, success=null) {
-    return $.getJSON($app.api.user.GET + id, null, success);
-}
-
-function get_friendships(success=null) {
-    return $.getJSON($app.api.friendships.GET, null, success);
-}
-
-function get_requests(success=null) {
-    return $.getJSON($app.api.requests.GET, null, success);
-}
-
-function get_online_users(success=null) {
-    return $.getJSON($app.api.online_users.GET, null, success);
-}
-
-function get_invites(success=null) {
-    return $.getJSON($app.api.invites.GET, null, success);
-}
-
-function get_games(success=null) {
-    return $.getJSON($app.api.games.GET, null, success);
 }

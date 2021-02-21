@@ -3,324 +3,136 @@
 {% block title %}Hello world title{% endblock %}
 
 {% block content %}
-    <div class="container-md">
-        <div class="row">
-            <div class="col-lg">
-                <h2 class="mx-auto">Friendship requests</h2>
-                <table class="table table-borderless table-striped align-middle" id="requests-table">
-                    <tbody></tbody>
-                </table>
-                <h2 class="mx-auto">Friends</h2>
-                <table class="table table-borderless table-striped" id="friends-table">
-                    <tbody></tbody>
-                </table>
-                <h2 class="mx-auto">Online users</h2>
-                <table class="table table-borderless table-striped" id="users-table">
-                    <tbody></tbody>
-                </table>
-            </div>
-            <div class="col-lg">
-                <h2 class="mx-auto">Invites</h2>
-                <table class="table table-borderless table-striped align-middle" id="invites-table">
-                    <tbody></tbody>
-                </table>
-                <h2 class="mx-auto">Games</h2>
-                <table class="table table-bordered">
-                    <tbody></tbody>
-                </table>
+    <div class="container-md" id="lobby-pane">
+    </div>
+
+    <div class="modal fade" id="invite-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Game invite</h5>
+                </div>
+                <div class="modal-body" id="invite-modal-wait-body">
+                    <p id="invite-modal-wait-text">
+                        Waiting for the other user.
+                    </p>
+                    <div class="text-center">
+                        <div class="spinner-grow text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body" id="invite-modal-denied-body">
+                    <p id="invite-modal-wait-text">
+                        Opponent has denied the invite.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="invite-modal-withdraw-button">Withdraw the invite
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="invite-modal-close-button"
+                            data-bs-dismiss="modal">Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-
-    {#  User table templates  #}
-
-    {% raw %}
-    <script id="user-row-template" type="text/x-handlebars-template">
-        <tr>
-            <td>{{ username }}</td>
-            <td>
-                <span class="text-success">online</span>
-            </td>
-            <td class="text-end">
-                {{#unless is_request_pending }}
-                <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ id }}">Add friend</a>
-                {{/unless }}
-            </td>
-        </tr>
-    </script>
-    {% endraw %}
-
-    {% raw %}
-    <script id="user-row-empty-template" type="text/x-handlebars-template">
-        <tr>
-            <td colspan="3" class="text-center">No other online players</td>
-        </tr>
-    </script>
-    {% endraw %}
-
-
-    {#  Friend table templates  #}
-
-    {% raw %}
-    <script id="friend-row-template" type="text/x-handlebars-template">
-        <tr>
-            <td>{{ username }}</td>
-            <td>
-                {{#if is_online }}
-                <span class="text-success">online</span>
-                {{else}}
-                <span class="text-danger">offline</span>
-                {{/if}}
-            </td>
-            <td class="text-end">
-                {{#unless is_invite_pending }}
-                <a class="btn btn-sm btn-primary" data-btn-invite data-id="{{ id }}">Invite</a>
-                {{/unless }}
-                <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ id }}">Unfriend</a>
-            </td>
-        </tr>
-    </script>
-    {% endraw %}
-
-    {% raw %}
-    <script id="friend-row-empty-template" type="text/x-handlebars-template">
-        <tr>
-            <td colspan="3" class="text-center">You have no friends</td>
-        </tr>
-    </script>
-    {% endraw %}
-
-
-    {#  Friend requests table templates  #}
-
-    {% raw %}
-    <script id="request-row-template" type="text/x-handlebars-template">
-        <tr>
-            <td>{{ username }}</td>
-            <td class="text-end">
-                {{#if is_recipient }}
-                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Remove</a>
-                {{else}}
-                <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ id }}">Accept</a>
-                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Decline</a>
-                {{/if }}
-            </td>
-        </tr>
-    </script>
-    {% endraw %}
-
-    {% raw %}
-    <script id="request-row-empty-template" type="text/x-handlebars-template">
-        <tr>
-            <td colspan="3" class="text-center">You have no friendship requests</td>
-        </tr>
-    </script>
-    {% endraw %}
-
-    {#  Invites table templates  #}
-
-    {% raw %}
-    <script id="invite-row-template" type="text/x-handlebars-template">
-        <tr>
-            <td>{{ username }}</td>
-            <td class="text-end">
-                {{#if is_recipient }}
-                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Remove</a>
-                {{else}}
-                <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ id }}">Accept</a>
-                <a class="btn btn-sm btn-danger" data-btn-decline data-id="{{ id }}">Decline</a>
-                {{/if }}
-            </td>
-        </tr>
-    </script>
-    {% endraw %}
-
-    {% raw %}
-    <script id="invite-row-empty-template" type="text/x-handlebars-template">
-        <tr>
-            <td colspan="3" class="text-center">You have no invites</td>
-        </tr>
-    </script>
-    {% endraw %}
-
 {% endblock %}
 
 {% block scripts %}
     <script>
         let lobby_socket = io('/lobby');
 
-        // --- loads ---
+        // --- invite modal ---
+        let modal = new bootstrap.Modal(document.getElementById("invite-modal"), {
+            backdrop: 'static',
+            keyboard: false
+        });
 
-        let user_row_template = Handlebars.compile(document.getElementById("user-row-template").innerHTML);
-        let user_row_empty_template = Handlebars.compile(document.getElementById("user-row-empty-template").innerHTML);
-        let friend_row_template = Handlebars.compile(document.getElementById("friend-row-template").innerHTML);
-        let friend_row_empty_template = Handlebars.compile(document.getElementById("friend-row-empty-template").innerHTML);
-        let request_row_template = Handlebars.compile(document.getElementById("request-row-template").innerHTML);
-        let request_row_empty_template = Handlebars.compile(document.getElementById("request-row-empty-template").innerHTML);
-        let invite_row_template = Handlebars.compile(document.getElementById("invite-row-template").innerHTML);
-        let invite_row_empty_template = Handlebars.compile(document.getElementById("invite-row-empty-template").innerHTML);
-
-        function load_friends() {
-            let tbody = $("#friends-table").find("tbody");
-
-            get_friendships(function (friendships) {
-                let friends = []
-                let calls = [];
-
-                $.each(friendships, function (key, friendship) {
-                    let call = get_user(friendship.recipient_id, function (user) {
-                        friends.push(user)
-                    });
-                    calls.push(call)
-                });
-
-                $.when.apply($, calls).then(function () {
-                    tbody.empty()
-
-                    if (friends.length === 0) {
-                        let html = friend_row_empty_template(null);
-                        tbody.append(html);
-                    } else {
-                        $.each(friends, function (key, friend) {
-                            friend.is_online = is_online(friend);
-                            let html = friend_row_template(friend);
-                            tbody.append(html);
-                        });
-                    }
-
-                    tbody.find("[data-btn-unfriend]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        remove_friendship(id);
-                    });
-                    tbody.find("[data-btn-invite]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        add_invite(id);
-                    });
-                });
-            });
+        function show_invite_modal() {
+            modal.show();
+            $("#invite-modal-wait-body").removeClass('d-none');
+            $("#invite-modal-denied-body").addClass('d-none');
+            $("#invite-modal-withdraw-button").removeClass('d-none');
+            $("#invite-modal-close-button").addClass('d-none');
         }
 
-        function load_users() {
-            let tbody = $("#users-table").find("tbody");
+        function switch_invite_modal() {
+            $("#invite-modal-wait-body").addClass('d-none');
+            $("#invite-modal-denied-body").removeClass('d-none');
+            $("#invite-modal-withdraw-button").addClass('d-none');
+            $("#invite-modal-close-button").removeClass('d-none');
+        }
 
-            get_online_users(function (users) {
-                tbody.empty()
+        // --- lobby pane ---
 
-                if (users.length === 0) {
-                    let html = user_row_empty_template(null);
-                    tbody.append(html);
-                } else {
-                    $.each(users, function (key, friend) {
-                        let html = user_row_template(friend);
-                        tbody.append(html);
-                    });
-                }
+        let lobby_pane = $("#lobby-pane");
 
-                tbody.find("[data-btn-friend]").click(function (event) {
+        function load_lobby_pane() {
+            lobby_pane.load("{{ url_for('lobby.lobby_pane') }}", function () {
+
+                let requests_table = $("#requests-table");
+                let friends_table = $("#friends-table");
+                let users_table = $("#users-table");
+                let invites_table = $("#invites-table");
+                let games_table = $("#games-table");
+
+                // --- bind requests buttons ---
+                requests_table.find("[data-btn-accept]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    add_request(id);
-                });
-            });
-        }
-
-
-        function load_requests() {
-            let tbody = $("#requests-table").find("tbody");
-
-            get_requests(function (requests) {
-                let requests_users = []
-                let calls = [];
-
-                $.each(requests, function (key, request) {
-                    let id;
-                    let is_recipient;
-
-                    if ($app.this_user_id === request.sender_id) {
-                        id = request.recipient_id;
-                        is_recipient = true;
-                    } else {
-                        id = request.sender_id;
-                        is_recipient = false;
-                    }
-
-                    let call = get_user(id, function (user) {
-                        user.is_recipient = is_recipient;
-                        requests_users.push(user)
+                    add_friendship(id, function () {
+                        load_lobby_pane();
                     });
-                    calls.push(call)
+                });
+                requests_table.find("[data-btn-refuse]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    remove_request(id, function () {
+                        load_lobby_pane();
+                    });
                 });
 
-                $.when.apply($, calls).then(function () {
-                    tbody.empty()
+                // --- bind friends buttons ---
+                friends_table.find("[data-btn-unfriend]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    remove_friendship(id, function () {
+                        load_lobby_pane();
+                    });
+                });
+                friends_table.find("[data-btn-invite]").click(function (event) {
+                    let id = $(this).attr('data-id');
 
-                    if (requests_users.length === 0) {
-                        let html = request_row_empty_template(null);
-                        tbody.append(html);
-                    } else {
-                        $.each(requests_users, function (key, user) {
-                            let html = request_row_template(user);
-                            tbody.append(html);
+                    add_invite(id, function () {
+                        let withdraw_button = $("#invite-modal-withdraw-button");
+
+                        withdraw_button.click(function (event) {
+                            remove_invite(id, function () {
+                                modal.hide();
+                            });
                         });
-                    }
 
-                    tbody.find("[data-btn-accept]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        add_friendship(id);
-                    });
-                    tbody.find("[data-btn-decline]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        remove_request(id);
+                        show_invite_modal()
                     });
                 });
-            });
-        }
 
-        function load_invites() {
-            let tbody = $("#invites-table").find("tbody");
-
-            get_invites(function (invites) {
-                let invites_users = []
-                let calls = [];
-
-                $.each(invites, function (key, invite) {
-                    let id;
-                    let is_recipient;
-
-                    if ($app.this_user_id === invite.sender_id) {
-                        id = invite.recipient_id;
-                        is_recipient = true;
-                    } else {
-                        id = invite.sender_id;
-                        is_recipient = false;
-                    }
-
-                    let call = get_user(id, function (user) {
-                        user.is_recipient = is_recipient;
-                        invites_users.push(user)
+                // --- bind users buttons ---
+                users_table.find("[data-btn-friend]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    console.log('click');
+                    add_request(id, function () {
+                        load_lobby_pane();
                     });
-                    calls.push(call)
                 });
 
-                $.when.apply($, calls).then(function () {
-                    tbody.empty()
-
-                    if (invites_users.length === 0) {
-                        let html = invite_row_empty_template(null);
-                        tbody.append(html);
-                    } else {
-                        $.each(invites_users, function (key, user) {
-                            let html = invite_row_template(user);
-                            tbody.append(html);
-                        });
-                    }
-
-                    tbody.find("[data-btn-accept]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        //accept_invite(id);
-                    });
-                    tbody.find("[data-btn-decline]").click(function (event) {
-                        let id = $(this).attr('data-id');
-                        deny_invite(id);
+                // --- bind invites buttons ---
+                invites_table.find("[data-btn-accept]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    //accept_invite(id);
+                });
+                invites_table.find("[data-btn-refuse]").click(function (event) {
+                    let id = $(this).attr('data-id');
+                    refuse_invite(id, function () {
+                        load_lobby_pane();
                     });
                 });
             });
@@ -328,36 +140,49 @@
 
         // --- Socket ---
 
-        lobby_socket.on('new_request', function () {
-            load_requests();
-            load_users();
+        lobby_socket.on('new_online_user', function () {
+            load_lobby_pane();
         });
 
-        lobby_socket.on('request_refused', function () {
-            load_requests();
-            load_users();
+        lobby_socket.on('request_received', function () {
+            load_lobby_pane();
         });
 
-        lobby_socket.on('new_friend', function () {
-            load_requests();
-            load_friends();
-            load_users();
+        lobby_socket.on('request_deleted', function () {
+            load_lobby_pane();
         });
 
-        lobby_socket.on('friend_removed', function () {
-            load_users();
-            load_friends();
+        lobby_socket.on('friendship_refused', function () {
+            load_lobby_pane();
         });
+
+        lobby_socket.on('friendship_accepted', function () {
+            load_lobby_pane();
+        });
+
+        lobby_socket.on('friendship_deleted', function () {
+            load_lobby_pane();
+        });
+
+        lobby_socket.on('invite_received', function () {
+            load_lobby_pane();
+        });
+
+        lobby_socket.on('invite_deleted', function () {
+            load_lobby_pane();
+        });
+
+        lobby_socket.on('invite_refused', function () {
+            switch_invite_modal();
+        });
+
+        // TODO game events
 
         $(document).ready(function (event) {
-            load_friends();
-            load_users();
-            load_requests();
-            load_invites();
+            load_lobby_pane();
 
             setInterval(function () {
-                load_friends();
-                load_users();
+                load_lobby_pane()
             }, 5000);
         });
     </script>

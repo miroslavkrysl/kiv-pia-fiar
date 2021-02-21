@@ -7,6 +7,8 @@ from fiar.routes.decorators import socket_context, RouteType, auth_user
 from fiar.services import auth
 from fiar.services.user import UserService
 
+GAME_NAMESPACE = '/game'
+
 
 class GameSocket(Namespace):
 

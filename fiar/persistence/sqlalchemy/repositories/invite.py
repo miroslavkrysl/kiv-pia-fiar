@@ -15,11 +15,13 @@ class InviteRepo:
         session = self.db.session
         return session.query(Invite).filter_by(sender=sender, recipient=recipient).first()
 
-    def get_all_by_user(self, user: User) -> Iterable[Invite]:
+    def get_all_received_by_user(self, user: User) -> Iterable[Invite]:
         session = self.db.session
-        return session.query(Invite).filter(or_(
-            invite_table.c.sender_id == user.id,
-            invite_table.c.recipient_id == user.id))
+        return session.query(Invite).filter_by(recipient=user)
+
+    def get_all_sent_by_user(self, user: User) -> Iterable[Invite]:
+        session = self.db.session
+        return session.query(Invite).filter_by(sender=user)
 
     def add(self, invite: Invite):
         session = self.db.session
