@@ -12,6 +12,10 @@ class MoveRepo:
         session = self.db.session
         return session.query(Move).filter_by(game=game)
 
+    def count_by_game(self, game: Game) -> int:
+        session = self.db.session
+        return session.query(Move).filter_by(game=game).count()
+
     def get_by_game_and_pos(self, game: Game, row: int, col: int) -> Move:
         session = self.db.session
         return session.query(Move).filter_by(game=game, row=row, col=col)

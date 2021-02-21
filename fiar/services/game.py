@@ -1,7 +1,8 @@
 from datetime import datetime
+from enum import Enum, auto
 from typing import Optional
 
-from fiar.data.models import User, Friendship, Game, Move
+from fiar.data.models import User, Friendship, Game, Move, MoveResult
 from fiar.persistence.sqlalchemy.repositories.game import GameRepo
 from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.move import MoveRepo
@@ -34,32 +35,38 @@ class GameService:
         game.winner = 0 if player == 1 else 1
         game.ended_at = datetime.now()
 
-    def do_move(self, game: Game, side: int, row: int, col: int) -> bool:
+    def do_move(self, game: Game, side: int, row: int, col: int) -> MoveResult:
         """
         Perform a game move. Checks board bounds and field emptiness.
         :param game: Game.
         :param side: Player - 0 for O, 1 for X.
         :param row: Row number.
         :param col: Col number.
-        :return: False if some of the checks fails, True otherwise.
+        :return: MoveResult.
         """
         assert side == 0 or side == 1
 
         if row < 0 or row >= self.board_size:
-            return False
+            return MoveResult.INVALID
 
         if col < 0 or col >= self.board_size:
-            return False
+            return MoveResult.INVALID
 
         if self.is_cell_occupied(game, row, col):
-            return False
+            return MoveResult.INVALID
 
         move = Move(game.id, side, row, col)
         self.move_repo.add(move)
 
-        return True
+        if self.check_fiar(game, side, row, col):
+            return MoveResult.WINNER
 
-    def accept_invite(self, user: User, opponent: User):
+        if self.is_full(game):
+            return MoveResult.DRAW
+
+        return MoveResult.OK
+
+    def accept_invite(self, user: User, opponent: User) -> Game:
         """
         Accept an invite. Creates a new game and removes pending invites between the two users.
         :param user: User
@@ -69,6 +76,8 @@ class GameService:
         self.game_repo.add(game)
 
         self.remove_pending_invites(user, opponent)
+
+        return game
 
     def remove_invite(self, user: User, opponent: User):
         """
@@ -131,3 +140,75 @@ class GameService:
         """
         move = self.move_repo.get_by_game_and_pos(game, row, col)
         return move is not None
+
+    def check_fiar(self, game: Game, side: int, row: int, col: int) -> bool:
+        """
+        Check if there is five in a row containing the given cell.
+        :param side: Side - 0 for O, 1 for X.
+        :param row: Cell row number.
+        :param col: Cell col number.
+        :param game: Game.
+        :return: True if is, false otherwise.
+        """
+        # horizontal check
+        in_line = 0
+        for c in range(col - 4, col + 5):
+            move = self.move_repo.get_by_game_and_pos(game, row, c)
+
+            if move is None or move.side != side:
+                in_line = 0
+            else:
+                in_line += 1
+
+        if in_line == 5:
+            return True
+
+        # vertical check
+        in_line = 0
+        for r in range(row - 4, row + 5):
+            move = self.move_repo.get_by_game_and_pos(game, r, col)
+
+            if move is None or move.side != side:
+                in_line = 0
+            else:
+                in_line += 1
+
+        if in_line == 5:
+            return True
+
+        # diagonal down
+        in_line = 0
+        for r, c in range(row - 4, row + 5), range(col - 4, col + 5):
+            move = self.move_repo.get_by_game_and_pos(game, r, c)
+
+            if move is None or move.side != side:
+                in_line = 0
+            else:
+                in_line += 1
+
+        if in_line == 5:
+            return True
+
+        # diagonal up
+        in_line = 0
+        for r, c in reversed(range(row - 4, row + 5)), range(col - 4, col + 5):
+            move = self.move_repo.get_by_game_and_pos(game, r, c)
+
+            if move is None or move.side != side:
+                in_line = 0
+            else:
+                in_line += 1
+
+        if in_line == 5:
+            return True
+
+        return False
+
+    def is_full(self, game: Game) -> bool:
+        """
+        Check if the game board is full.
+        :param game: Game.
+        :return: True if full, false otherwise.
+        """
+        count = self.move_repo.count_by_game(game)
+        return count == self.board_size * self.board_size

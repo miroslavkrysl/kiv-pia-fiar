@@ -25,3 +25,30 @@ class UserSchema(Schema):
 
 
 user_schema = UserSchema()
+
+
+# --- Game ---
+
+class GameSchema(Schema):
+    id = fields.Int(dump_only=True)
+    player_o_id = fields.Int(required=True)
+    player_x_id = fields.Int(required=True)
+    winner = fields.Int(allow_none=True)
+    created_at = fields.DateTime()
+    ended_at: fields.DateTime(allow_none=True)
+
+
+game_schema = GameSchema()
+
+
+# --- Move ---
+
+class MoveSchema(Schema):
+    side = fields.Int(required=True, validate=[
+        validate.OneOf([0, 1])
+    ])
+    row = fields.Int(required=True)
+    col = fields.Int(required=True)
+
+
+move_schema = GameSchema()

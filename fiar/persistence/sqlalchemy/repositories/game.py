@@ -11,6 +11,10 @@ class GameRepo:
     def __init__(self, db: SqlAlchemyDb):
         self.db = db
 
+    def get_by_id(self, id: int) -> Game:
+        session = self.db.session
+        return session.query(Game).filter_by(id=id).first()
+
     def get_by_players(self, player_o: User, player_x: User) -> Optional[Game]:
         session = self.db.session
         return session.query(Game).filter_by(player_o=player_o, player_x=player_x).first()

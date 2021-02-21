@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum, auto
 from typing import Optional
 
 
@@ -52,3 +53,10 @@ class Request:
 class Friendship:
     sender_id: int
     recipient_id: int
+
+
+class MoveResult(Enum):
+    OK = 'ok'
+    INVALID = 'invalid'
+    DRAW = 'draw'
+    WINNER = 'win'
