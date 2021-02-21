@@ -84,6 +84,30 @@ def post_game(opponent_id: int,
     return jsonify(game_schema.dump(game)), 201
 
 
+@bp.route('/end/<int:game_id>', methods=['PUT'])
+@auth_user(RouteType.API)
+@inject
+def put_end(game_id: int,
+            auth: User,
+            game_repo: GameRepo = Provide[AppContainer.game_repo],
+            game_service: GameService = Provide[AppContainer.game_service]):
+    game = game_repo.get_by_id(game_id)
+
+    if game is None:
+        return jsonify({'error': f'Game with id {game_id} does not exist'}), 404
+
+    side = game_service.get_player_side(game, auth)
+    if side is None:
+        return jsonify({'error': 'You are not in this game.'}), 403
+
+    if game_service.is_ended(game):
+        return jsonify(), 200
+
+    game_service.surrender(game, side)
+
+    return jsonify(), 201
+
+
 # --- Move ---
 
 @bp.route('/move/<int:game_id>', methods=['PUT'])
@@ -96,7 +120,7 @@ def put_move(game_id: int,
     game = game_repo.get_by_id(game_id)
 
     if game is None:
-        return jsonify({'error': f'User with {game_id} does not exist'}), 404
+        return jsonify({'error': f'Game with id {game_id} does not exist'}), 404
 
     try:
         data = move_schema.load(request.form)

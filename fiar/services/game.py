@@ -25,11 +25,11 @@ class GameService:
         self.move_repo = move_repo
         self.board_size = board_size
 
-    def give_up(self, side: int, game: Game):
+    def surrender(self, game: Game, side: int):
         """
-        Give up game. Sets ended_at datetime to now and winner to other player.
-        :param side: Player who gives up - 0 for O, 1 for X.
+        Surrender. Sets winner to the other player.
         :param game: Game.
+        :param side: Player who is surrendering - 0 for O, 1 for X.
         """
         assert side == SIDE_O or side == SIDE_X
         game.winner = SIDE_O if side == SIDE_X else SIDE_X
