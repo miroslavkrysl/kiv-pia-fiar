@@ -1,25 +1,39 @@
 {% extends 'base.html' %}
 
-{% block title %}Registration{% endblock %}
+{% block title %}Profile{% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-sm-8 col-md-6 col-lg-5 col-xl-4">
-                <h4 class="mb-3">Registration</h4>
-                <form id="register-form" data-method="POST" data-action="{{ url_for('user_api.post_registration') }}">
+                <h2 class="mb-3">Profile</h2>
+
+                <div class="alert alert-success alert-dismissible d-none" id="password-message">
+                    Password has been successfully changed.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <p>Username: <strong>{{ user.username }}</strong></p>
+                <p>Email: <strong>{{ user.email }}</strong></p>
+
+                {% if auth_user.is_admin and auth_user != user %}
+                    <form class="pt-2" id="admin-form" data-method="PUT"
+                          data-action="{{ url_for('user_api.put_admin', id=user.id) }}">
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" name="is_admin" id="is-admin">
+                            <label class="form-check-label" for="is-admin">Is admin</label>
+                        </div>
+                    </form>
+                {% else %}
+                    {% if user.is_admin %}
+                        <p><strong class="text-primary">Admin</strong></p>
+                    {% endif %}
+                {% endif %}
+
+                <form class="pt-2" id="password-form" data-method="PUT"
+                      data-action="{{ url_for('user_api.put_pswd_change', id=user.id) }}">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" name="username" id="username">
-                        <div class="invalid-feedback" id="feedback-username"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" name="email" id="email">
-                        <div class="invalid-feedback" id="feedback-email"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">New password</label>
                         <input type="password" class="form-control app-pwd-strength" name="password" id="password"
                                data-strength-bar="strength-bar">
                         <div class="invalid-feedback" id="feedback-password"></div>
@@ -37,21 +51,20 @@
                             Passwords does not match
                         </div>
                     </div>
-                    <div class="text-end">
-                        <button type="submit" class="btn btn-primary">Register</button>
-                    </div>
+                    <button type="submit" class="btn btn-primary float-end">Change password</button>
                 </form>
             </div>
         </div>
     </div>
 {% endblock %}
 
-
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/pwd_strength.js') }}"></script>
     <script>
-        $("#register-form").submit(function (event) {
+        $("#password-form").submit(function (event) {
             event.preventDefault();
+            let password_message = $("#password-message");
+            password_message.addClass('d-none');
 
             let form = $(this);
             let url = form.attr('data-action');
@@ -83,24 +96,25 @@
                 dataType: 'json',
                 data: form.serialize(),
                 success: function (response) {
-                    $(location).attr('href', '/');
+                    password_message.removeClass('d-none');
                 },
                 error: function (response) {
-                    submit_button.prop('disabled', false);
                     let data = response.responseJSON;
-
-                    if (data.error) {
-                        let message = $("#error-message");
-                        message.text(data.errors);
-                        message.removeClass('d-none');
-                    } else {
-                        $.each(data.errors, function (key, val) {
-                            form.find("input[name=" + key + "]").addClass("is-invalid");
-                            let text = val.join("<br>");
-                            form.find("#feedback-" + key).text(text);
-                        });
-                    }
+                    //
                 }
+            });
+        });
+
+        $("#is-admin").click(function (event) {
+            let form = $('#admin-form');
+            let url = form.attr('data-action');
+            let method = form.attr('data-method');
+
+            $.ajax({
+                url: url,
+                type: method,
+                dataType: 'json',
+                data: form.serialize(),
             });
         });
     </script>

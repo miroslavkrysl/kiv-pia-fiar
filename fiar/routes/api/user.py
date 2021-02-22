@@ -6,9 +6,9 @@ from marshmallow import fields, ValidationError
 
 from fiar.data.models import User
 from fiar.persistence.sqlalchemy.repositories.user import UserRepo
-from fiar.data.schemas import UserSchema, user_schema
+from fiar.data.schemas import UserSchema, user_schema, admin_schema
 from fiar.di.container import AppContainer
-from fiar.routes.decorators import RouteType, auth_user
+from fiar.routes.decorators import RouteType, auth_user, admin_only
 from fiar.services.auth import AuthService
 from fiar.services.friendship import FriendshipService
 from fiar.services.game import GameService
@@ -152,4 +152,53 @@ def put_pswd_reset(token: str,
     user_service.change_password(user, data['password'])
     user_service.change_uid(user)
 
+    return jsonify(), 200
+
+
+# --- Pswd change ---
+
+@bp.route('/pswd-change/<int:id>', methods=['PUT'])
+@auth_user(RouteType.API)
+@inject
+def put_pswd_change(id: int,
+                    auth: User,
+                    user_service: UserService = Provide[AppContainer.user_service],
+                    user_repo: UserRepo = Provide[AppContainer.user_repo],
+                    auth_service: AuthService = Provide[AppContainer.auth_service]):
+    user = user_repo.get_by_id(id)
+
+    if user is None:
+        return jsonify({"error": f"User with id {id} does not exist"}), 404
+
+    try:
+        data = pswd_schema.load(request.form)
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    user_service.change_password(user, data['password'])
+    user_service.change_uid(user)
+    auth_service.login(user)
+
+    return jsonify(), 200
+
+
+# --- Admin ---
+
+@bp.route('/admin/<int:id>', methods=['PUT'])
+@auth_user(RouteType.API)
+@admin_only(RouteType.API)
+@inject
+def put_admin(id: int,
+              user_repo: UserRepo = Provide[AppContainer.user_repo]):
+    user = user_repo.get_by_id(id)
+
+    if user is None:
+        return jsonify({"error": f"User with id {id} does not exist"}), 404
+
+    try:
+        data = admin_schema.load(request.form)
+    except ValidationError as err:
+        return jsonify({"errors": err.messages}), 400
+
+    user.is_admin = data['is_admin']
     return jsonify(), 200

@@ -1,18 +1,27 @@
 SECRET_KEY = 'ViCAZJknGALnmoVcMSimhmT5GT4gIpcK89MCiJGtzxC'
 
-[DATABASE]
-PROVIDER = 'postgres'
+[SQL_ALCHEMY]
+DIALECT = 'postgresql'
+USERNAME = 'pia'
+PASSWORD = 'pia'
 HOST = '127.0.0.1'
 PORT = 5432
-NAME = 'pia'
-USER = 'pia'
-PASSWORD = 'pia'
+DATABASE = 'pia'
 
 [GAME]
-BOARD_DEFAULT_SIZE = 15
-BOARD_MAX_SIZE = 4096
+BOARD_SIZE = 15
 
-[UID]
-LENGTH = 64
+[MAIL]
+SENDER_ADDR = 'app@fiar.io'
+SENDER_NAME = 'FIAR'
+HOST = 'smtp.gmail.com'
+USERNAME = 'hello@example.com'
+PASSWORD = 'supersecretpassword'
+PORT = 587
+SSL = false
+TLS = true
 
-
+[USER]
+PSWD_RESET_EXP = 900
+UID_LENGTH = 64
+ONLINE_TIMEOUT = 5

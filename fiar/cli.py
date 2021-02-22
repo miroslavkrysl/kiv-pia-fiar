@@ -58,18 +58,18 @@ def db_init_command(db: SqlAlchemyDb = Provide[AppContainer.sqlalchemy_db]):
 @with_appcontext
 @with_request_context
 @inject
-def db_fill_command(user_service: UserService = Provide[AppContainer.user_service],
-                    user_repo: UserRepo = Provide[AppContainer.user_repo]):
-    user_service.create_user(username='hello',
-                             email='hello@example.com',
-                             password='password')
+def db_fill_command(user_service: UserService = Provide[AppContainer.user_service]):
+    user_service.create_user(username='admin',
+                             email='admin@example.com',
+                             password='admin',
+                             is_admin=True)
+
+    user_service.create_user(username="hello",
+                             email="hello@example.com",
+                             password="hello")
 
     user_service.create_user(username="jello",
                              email="jello@example.com",
-                             password="password")
+                             password="jello")
 
-    user_service.create_user(username="mkrysl",
-                             email="mkrysl@protonmail.com",
-                             password="password")
-
-    click.echo('Database filled with example data.')
+    click.echo('Database filled with initial data.')

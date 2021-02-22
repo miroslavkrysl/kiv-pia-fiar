@@ -13,8 +13,8 @@ class UserSchema(Schema):
         validate.Length(max=255)
     ])
     password = fields.Str(required=True, load_only=True)
-    is_admin = fields.Boolean()
-    last_active_at = fields.DateTime()
+    is_admin = fields.Boolean(dump_only=True)
+    last_active_at = fields.DateTime(dump_only=True)
 
     @post_load
     def process_input(self, data, **kwargs):
@@ -89,3 +89,12 @@ class BoardMoveSchema:
 
 
 board_schema = BoardMoveSchema()
+
+
+# --- Admin ---
+
+class AdminSchema(Schema):
+    is_admin = fields.Boolean()
+
+
+admin_schema = AdminSchema()
