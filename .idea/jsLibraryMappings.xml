@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$" libraries="{bootstrap, font-awesome, handlebars, jquery-3.5.1, pia/node_modules, socket.io, zxcvbn}" />
-    <file url="PROJECT" libraries="{pia/node_modules}" />
+    <file url="file://$PROJECT_DIR$" libraries="{bootstrap, font-awesome, handlebars, jquery-3.5.1, socket.io, zxcvbn}" />
     <includedPredefinedLibrary name="Node.js Core" />
   </component>
 </project>
