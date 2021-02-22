@@ -10,6 +10,9 @@ Python Flask app + PostgreSQL DB + Gunicorn http server
 
 ## Installation and run
 
+1) copy `fiar/config.example.toml` into `fiar/config.toml`
+2) edit `fiar/config.toml`, especially mail server
+
 #### Docker: (Gunicorn http server + Flask app) + (PostgreSQL)
 ```
 cd path/to/project/root
