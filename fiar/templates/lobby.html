@@ -45,13 +45,13 @@
         let lobby_socket = io('/lobby');
 
         // --- invite modal ---
-        let modal = new bootstrap.Modal(document.getElementById("invite-modal"), {
+        let invite_modal = new bootstrap.Modal(document.getElementById("invite-modal"), {
             backdrop: 'static',
             keyboard: false
         });
 
         function show_invite_modal() {
-            modal.show();
+            invite_modal.show();
             $("#invite-modal-wait-body").removeClass('d-none');
             $("#invite-modal-denied-body").addClass('d-none');
             $("#invite-modal-withdraw-button").removeClass('d-none');
@@ -107,7 +107,7 @@
 
                         withdraw_button.click(function (event) {
                             remove_invite(id, function () {
-                                modal.hide();
+                                invite_modal.hide();
                             });
                         });
 
@@ -127,7 +127,9 @@
                 // --- bind invites buttons ---
                 invites_table.find("[data-btn-accept]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    //accept_invite(id);
+                    accept_invite(id, function (response) {
+                        $(location).attr('href', $app.html.game.GET + response.id);
+                    });
                 });
                 invites_table.find("[data-btn-refuse]").click(function (event) {
                     let id = $(this).attr('data-id');
@@ -176,14 +178,20 @@
             switch_invite_modal();
         });
 
-        // TODO game events
+        lobby_socket.on('invite_accepted', function (game_id) {
+            $(location).attr('href', $app.html.game.GET + game_id);
+        });
+
+        lobby_socket.on('game_surrendered', function () {
+            load_lobby_pane();
+        });
 
         $(document).ready(function (event) {
             load_lobby_pane();
 
             setInterval(function () {
                 load_lobby_pane()
-            }, 5000);
+            }, 3000);
         });
     </script>
 

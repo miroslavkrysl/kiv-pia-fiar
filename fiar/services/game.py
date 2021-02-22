@@ -57,9 +57,6 @@ class GameService:
         move = Move(game.id, side, row, col)
         self.move_repo.add(move)
 
-        # switch user on turn
-        game.on_turn = SIDE_O if side == SIDE_X else SIDE_X
-
         # check end game conditions
         if self.check_fiar(game, side, row, col):
             game.winner = side
@@ -68,6 +65,9 @@ class GameService:
         if self.is_full(game):
             game.winner = SIDE_DRAW
             return MoveResult.DRAW
+
+        # switch user on turn
+        game.on_turn = SIDE_O if side == SIDE_X else SIDE_X
 
         return MoveResult.OK
 
@@ -116,6 +116,16 @@ class GameService:
         """
         assert side == SIDE_O or side == SIDE_X
         return side == game.on_turn
+
+    def opponent_id(self, game: Game, side: int) -> int:
+        """
+        Get the opponents id by players side.
+        :param game: Game.
+        :param side: Side - 0 for O, 1 for X.
+        :return: Opponents id.
+        """
+        assert side == SIDE_O or side == SIDE_X
+        return game.player_x_id if side == SIDE_O else game.player_o_id
 
     def is_ended(self, game: Game) -> bool:
         """
@@ -191,8 +201,8 @@ class GameService:
             else:
                 in_line += 1
 
-        if in_line == 5:
-            return True
+            if in_line == 5:
+                return True
 
         # vertical check
         in_line = 0
@@ -204,12 +214,12 @@ class GameService:
             else:
                 in_line += 1
 
-        if in_line == 5:
-            return True
+            if in_line == 5:
+                return True
 
         # diagonal down
         in_line = 0
-        for r, c in range(row - 4, row + 5), range(col - 4, col + 5):
+        for r, c in zip(range(row - 4, row + 5), range(col - 4, col + 5)):
             move = self.move_repo.get_by_game_and_pos(game, r, c)
 
             if move is None or move.side != side:
@@ -217,12 +227,12 @@ class GameService:
             else:
                 in_line += 1
 
-        if in_line == 5:
-            return True
+            if in_line == 5:
+                return True
 
         # diagonal up
         in_line = 0
-        for r, c in reversed(range(row - 4, row + 5)), range(col - 4, col + 5):
+        for r, c in zip(reversed(range(row - 4, row + 5)), range(col - 4, col + 5)):
             move = self.move_repo.get_by_game_and_pos(game, r, c)
 
             if move is None or move.side != side:
@@ -230,8 +240,8 @@ class GameService:
             else:
                 in_line += 1
 
-        if in_line == 5:
-            return True
+            if in_line == 5:
+                return True
 
         return False
 

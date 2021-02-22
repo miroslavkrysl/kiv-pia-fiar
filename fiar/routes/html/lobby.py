@@ -6,6 +6,7 @@ from flask import Blueprint, render_template, current_app
 from fiar.data.models import User
 from fiar.di.container import AppContainer
 from fiar.persistence.sqlalchemy.repositories.friendship import FriendshipRepo
+from fiar.persistence.sqlalchemy.repositories.game import GameRepo
 from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.request import RequestRepo
 from fiar.persistence.sqlalchemy.repositories.user import UserRepo
@@ -36,6 +37,7 @@ def lobby_pane(auth: User,
                friendship_service: FriendshipService = Provide[AppContainer.friendship_service],
                game_service: GameService = Provide[AppContainer.game_service],
                invite_repo: InviteRepo = Provide[AppContainer.invite_repo],
+               game_repo: GameRepo = Provide[AppContainer.game_repo],
                request_repo: RequestRepo = Provide[AppContainer.request_repo]):
     # --- friends users ---
     friendships = friendship_repo.get_all_by_user(auth)
@@ -61,8 +63,12 @@ def lobby_pane(auth: User,
     # --- requests ---
     requests = request_repo.get_all_by_user(auth)
 
+    # --- games ---
+    games = game_repo.get_all_by_player(auth)
+
     return render_template('ajax/lobby_pane.html',
                            requests=requests[:],
                            online_users=online_users[:],
                            invites=invites[:],
+                           games=reversed(games[:]),
                            friends=friends[:])

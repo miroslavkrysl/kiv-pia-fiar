@@ -16,7 +16,7 @@ class UserSocket(Namespace):
     @auth_user(RouteType.SOCKET)
     @inject
     def on_connect(self):
-        emit('new_online_user', to=LOBBY_ROOM, include_self=False, namespace=LOBBY_NAMESPACE)
+        emit('new_online_user', to=LOBBY_ROOM, broadcast=True, include_self=False, namespace=LOBBY_NAMESPACE)
 
     @socket_context()
     @auth_user(RouteType.SOCKET)

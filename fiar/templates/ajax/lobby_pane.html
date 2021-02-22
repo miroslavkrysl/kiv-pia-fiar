@@ -2,118 +2,165 @@
     <div class="col-lg">
 
         {# --- Friendship Requests --- #}
-
-        <h2 class="mx-auto">Friendship requests</h2>
-        <table class="table table-borderless table-striped align-middle" id="requests-table">
-            <tbody>
-            {% for request in requests %}
-                <tr>
-                    {% if auth_user == request.sender %}
-                        <td>{{ request.recipient.username }}</td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-danger" data-btn-refuse
-                               data-id="{{ request.recipient.id }}">Withdraw</a>
-                        </td>
-                    {% else %}
-                        <td>{{ request.sender.username }}</td>
-                        <td class="text-end">
-                            <a class="btn btn-sm btn-success me-1" data-btn-accept data-id="{{ request.sender.id }}">Accept</a>
-                            <a class="btn btn-sm btn-danger" data-btn-refuse
-                               data-id="{{ request.sender.id }}">Refuse</a>
-                        </td>
-                    {% endif %}
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">You have no friendship requests</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="card my-3">
+            <div class="card-header">
+                <h4>Friendship requests</h4>
+            </div>
+            <table class="table align-middle" id="requests-table">
+                <tbody>
+                {% for request in requests %}
+                    <tr>
+                        {% if auth_user == request.sender %}
+                            <td>{{ request.recipient.username }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-danger" data-btn-refuse
+                                   data-id="{{ request.recipient.id }}">Withdraw</a>
+                            </td>
+                        {% else %}
+                            <td>{{ request.sender.username }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-success me-1" data-btn-accept
+                                   data-id="{{ request.sender.id }}">Accept</a>
+                                <a class="btn btn-sm btn-danger" data-btn-refuse
+                                   data-id="{{ request.sender.id }}">Refuse</a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">You have no friendship requests</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
 
         {# --- Friends --- #}
-
-        <h2 class="mx-auto">Friends</h2>
-        <table class="table table-borderless table-striped" id="friends-table">
-            <tbody>
-            {% for friend in friends %}
-                <tr>
-                    <td>{{ friend.username }}</td>
-                    <td>
-                        {% if friend.is_online %}
-                            <span class="text-success">online</span>
-                        {% else %}
-                            <span class="text-danger">offline</span>
-                        {% endif %}
-                    </td>
-                    <td class="text-end">
-                        {% if not friend.has_sent_invite %}
-                            <a class="btn btn-sm btn-primary" data-btn-invite data-id="{{ friend.id }}">Invite</a>
-                        {% endif %}
-                        <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ friend.id }}">Unfriend</a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">You have no friends</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="card my-3">
+            <div class="card-header">
+                <h4>Friends</h4>
+            </div>
+            <table class="table align-middle" id="friends-table">
+                <tbody>
+                {% for friend in friends %}
+                    <tr>
+                        <td>{{ friend.username }}</td>
+                        <td>
+                            {% if friend.is_online %}
+                                <span class="text-success">online</span>
+                            {% else %}
+                                <span class="text-danger">offline</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if not friend.has_sent_invite %}
+                                <a class="btn btn-sm btn-primary" data-btn-invite data-id="{{ friend.id }}">Invite</a>
+                            {% endif %}
+                            <a class="btn btn-sm btn-danger" data-btn-unfriend data-id="{{ friend.id }}">Unfriend</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">You have no friends</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
 
         {# --- Online Users --- #}
 
-        <h2 class="mx-auto">Online users</h2>
-        <table class="table table-borderless table-striped" id="users-table">
-            <tbody>
-            {% for user in online_users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>
-                        <span class="text-success">online</span>
-                    </td>
-                    <td class="text-end">
-                        {% if not is_request_pending %}
-                            <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ user.id }}">Add friend</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">No other online users</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <div class="card my-3">
+            <div class="card-header">
+                <h4>Online users</h4>
+            </div>
+            <table class="table align-middle" id="users-table">
+                <tbody>
+                {% for user in online_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            <span class="text-success">online</span>
+                        </td>
+                        <td class="text-end">
+                            {% if not is_request_pending %}
+                                <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ user.id }}">Add friend</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No other online users</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {# --- Invites --- #}
 
     <div class="col-lg">
-        <h2 class="mx-auto">Invites</h2>
-        <table class="table table-borderless table-striped align-middle" id="invites-table">
-            <tbody>
-            {% for invite in invites %}
-                <tr>
-                    <td>{{ invite.sender.username }}</td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-success me-1" data-btn-accept
-                           data-id="{{ invite.sender.id }}">Accept</a>
-                        <a class="btn btn-sm btn-danger" data-btn-refuse data-id="{{ invite.sender.id }}">Refuse</a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">You have no invites</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <h2 class="mx-auto">Games</h2>
-        <table class="table table-bordered">
-            <tbody></tbody>
-        </table>
+        <div class="card my-3">
+            <div class="card-header">
+                <h4>Invites</h4>
+            </div>
+            <table class="table align-middle" id="invites-table">
+                <tbody>
+                {% for invite in invites %}
+                    <tr>
+                        <td>{{ invite.sender.username }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-success me-1" data-btn-accept
+                               data-id="{{ invite.sender.id }}">Accept</a>
+                            <a class="btn btn-sm btn-danger" data-btn-refuse data-id="{{ invite.sender.id }}">Refuse</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">You have no invites</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# --- Games --- #}
+
+        <div class="card my-3">
+            <div class="card-header">
+                <h4>Games</h4>
+            </div>
+            <table class="table align-middle" id="games-table">
+                <tbody>
+                {% for game in games %}
+                    <tr>
+                        <td><i class="far fa-xs fa-circle text-primary"></i> {{ game.player_o.username }}</td>
+                        <td><i class="fas fa-xs fa-times text-danger"></i> {{ game.player_x.username }}</td>
+                        <td>
+                            {% if game.winner == 0 and game.player_o == auth_user or game.winner == 1 and game.player_x == auth_user %}
+                                <span class="badge bg-success">win</span>
+                            {% elif game.winner == 0 or game.winner == 1 %}
+                                <span class="badge bg-danger">loss</span>
+                            {% elif game.winner == 2 %}
+                                <span class="badge bg-warning">draw</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               href="{{ url_for('game.index', id=game.id) }}">
+                                {% if game.winner == None %}Continue{% else %}View{% endif %}</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">You have no games</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

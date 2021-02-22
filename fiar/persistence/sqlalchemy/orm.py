@@ -42,12 +42,10 @@ mapper_registry.map_imperatively(Game, game_table, properties={
 
 move_table = Table(
     'move', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('game_id', Integer, ForeignKey('game.id'), nullable=False),
-    Column('side', Integer, nullable=False),
-    Column('row', Integer, nullable=False),
-    Column('col', Integer, nullable=False),
-    UniqueConstraint('game_id', 'row', 'col')
+    Column('game_id', Integer, ForeignKey('game.id'), primary_key=True),
+    Column('row', Integer, primary_key=True),
+    Column('col', Integer, primary_key=True),
+    Column('side', Integer, nullable=False)
 )
 
 mapper_registry.map_imperatively(Move, move_table, properties={

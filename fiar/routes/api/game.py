@@ -1,3 +1,5 @@
+import json
+
 from dependency_injector.wiring import inject, Provide
 from flask import Blueprint, jsonify, request
 from flask_socketio import emit
@@ -11,6 +13,7 @@ from fiar.persistence.sqlalchemy.repositories.invite import InviteRepo
 from fiar.persistence.sqlalchemy.repositories.user import UserRepo
 from fiar.routes.decorators import auth_user, RouteType
 from fiar.routes.socket import LOBBY_NAMESPACE
+from fiar.routes.socket.game import GAME_NAMESPACE, game_room_name
 from fiar.services.game import GameService
 
 bp = Blueprint('game_api', __name__)
@@ -35,7 +38,7 @@ def post_game(opponent_id: int,
 
     game = game_service.accept_invite(auth, opponent)
 
-    emit('invite_accepted', to=opponent_id, namespace=LOBBY_NAMESPACE)
+    emit('invite_accepted', game.id, to=opponent_id, namespace=LOBBY_NAMESPACE)
 
     return jsonify(game_schema.dump(game)), 201
 
@@ -60,6 +63,9 @@ def post_surrender(game_id: int,
         return jsonify({'error': 'Already ended.'}), 412
 
     game_service.surrender(game, side)
+
+    room = game_room_name(game_id, game_service.opponent_id(game, side))
+    emit('opponent_surrendered', to=room, namespace=GAME_NAMESPACE)
 
     return jsonify(), 200
 
@@ -99,6 +105,8 @@ def post_move(game_id: int,
     elif result == MoveResult.OCCUPIED:
         code = 409
     else:
+        room = game_room_name(game_id, game_service.opponent_id(game, side))
+        emit('opponent_played', result.value, to=room, namespace=GAME_NAMESPACE)
         code = 201
 
     return jsonify({'result': result.value}), code

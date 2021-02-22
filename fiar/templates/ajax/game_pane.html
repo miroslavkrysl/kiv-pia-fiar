@@ -1,0 +1,49 @@
+<div class="row text-center align-items-center">
+    <div id="top-text-names">
+        <h4 class="d-inline-block me-2 {% if game.on_turn == 1 and game.winner == None %}text-muted{% endif %} text-primary"
+            id="player-o-name">
+            <i class="far fa-circle"></i> {{ game.player_o.username }}
+        </h4>
+        <h2 id="top-text-ended"
+            class="d-inline-block mx-4">
+            {% if game.winner == 2 %}
+                <span class="badge bg-warning">DRAW</span>
+            {% elif game.winner == side %}
+                <span class="badge bg-success">WIN</span>
+            {% elif game.winner == 0 or game.winner == 1 %}
+                <span class="badge bg-danger">LOSS</span>
+            {% endif %}
+        </h2>
+        <h4 class="d-inline-block me-2 {% if game.on_turn == 0 and game.winner == None %}text-muted{% endif %} text-danger"
+            id="player-o-name">
+            <i class="fas fa-times"></i> {{ game.player_x.username }}
+        </h4>
+    </div>
+</div>
+<div class="text-center" id="board">
+    <table class="p-0 mx-auto my-3">
+        <tbody>
+        {% for row in board %}
+            <tr>
+                {% for cell in row %}
+                    <td class="align-middle text-center"
+                        data-col="{{ cell.col }}" data-row="{{ cell.row }}"
+                        {% if cell.side == None %}data-empty-cell{% endif %}>
+
+                        {% if cell.side == 0 %}
+                            <i class="far fa-lg fa-circle text-primary"></i>
+                        {% elif cell.side == 1 %}
+                            <i class="fas fa-lg fa-times text-danger"></i>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% if game.winner == None %}
+    <div class="text-center">
+        <button class="btn btn-danger ms-2" id="surrender-button">Surrender</button>
+    </div>
+{% endif %}

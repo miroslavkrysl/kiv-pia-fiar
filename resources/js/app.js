@@ -73,7 +73,7 @@ function remove_invite(opponent_id, success=null, error=null) {
 function accept_invite(friend_id, success=null, error=null) {
     return $.ajax({
         url: $app.api.game.POST + friend_id,
-        type: 'put',
+        type: 'post',
         dataType: 'json',
         success: success,
         error: error
@@ -84,6 +84,30 @@ function refuse_invite(friend_id, success=null, error=null) {
     return $.ajax({
         url: $app.api.invite.DELETE + friend_id,
         type: 'delete',
+        dataType: 'json',
+        success: success,
+        error: error
+    });
+}
+
+function do_move(game_id, row, col, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.move.POST + game_id,
+        type: 'post',
+        dataType: 'json',
+        data: {
+            row: row,
+            col: col
+        },
+        success: success,
+        error: error
+    });
+}
+
+function surrender(game_id, success=null, error=null) {
+    return $.ajax({
+        url: $app.api.surrender.POST + game_id,
+        type: 'post',
         dataType: 'json',
         success: success,
         error: error

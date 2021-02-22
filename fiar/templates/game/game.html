@@ -3,25 +3,7 @@
 {% block content %}
     <div class="container">
         <div class="row">
-            <div class="col-lg-8">
-                <div class="row text-center align-items-center">
-                    <div class="col text-end">
-                        {% if this_player == 0 %}
-                            <h6 class="text-primary d-none">Your turn</h6>
-                            <h6 class="text-danger">Opponents turn</h6>
-                        {% else %}
-                            <h6 class="text-danger d-none">Your turn</h6>
-                            <h6 class="text-primary">Opponents turn</h6>
-                        {% endif %}
-                    </div>
-                    <div class="col text-start">
-                        <button class="btn btn-danger">End game</button>
-                    </div>
-                </div>
-                <table id="game-board" class="p-0 mx-auto my-3">
-                    <tbody>
-                    </tbody>
-                </table>
+            <div class="col-lg-8" id="game-pane">
             </div>
             <div class="col-lg-4">
                 <h3>Chat</h3>
@@ -29,13 +11,26 @@
         </div>
     </div>
 
+    <div class="modal fade" id="opponent-surrendered-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    Opponent has surrendered!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
-        #game-board {
+        #board {
             border-spacing: 0;
             border-collapse: collapse;
         }
 
-        #game-board td {
+        #board td {
             border-spacing: 0;
             border-collapse: collapse;
             overflow: hidden;
@@ -44,26 +39,76 @@
             width: 30px;
             height: 30px;
         }
+
+        .clickable {
+            cursor: pointer;
+        }
     </style>
 {% endblock %}
 
 {% block scripts %}
     <script>
-        let this_player = {{ this_player|safe }};
+        let on_turn = {{ (game.on_turn == side and game.winner == None) | tojson }};
+        let game_id = {{ game.id | tojson }};
     </script>
     <script>
-        function load_board() {
-            let table = $("#game-board");
+        let game_socket = io('/game');
 
-            table.find("tbody").load("{{ url_for('game.game_board') }}", function () {
-                table.find("td").click(function (event) {
-                    // todo
+        let opponent_surrendered_modal = new bootstrap.Modal(document.getElementById("opponent-surrendered-modal"), {});
+
+        let game_pane = $('#game-pane');
+
+        function load_game_pane(on_turn) {
+            game_pane.load("{{ url_for('game.get_game_pane', id=game.id) }}", function () {
+                $('#surrender-button').click(function (event) {
+                    surrender(game_id, function () {
+                        $(location).attr('href', '/');
+                    })
                 });
+
+                if (on_turn) {
+                    console.log(on_turn);
+                    let cells = game_pane.find("[data-empty-cell]");
+                    cells.addClass('clickable');
+
+                    cells.click(function (event) {
+                        let row = $(this).attr('data-row');
+                        let col = $(this).attr('data-col');
+
+                        load_game_pane(true);
+                        do_move(game_id, row, col, function () {
+                            load_game_pane(false);
+                        });
+                    });
+                }
             });
         }
 
+
+        // --- Socket ---
+
+        game_socket.on('opponent_surrendered', function () {
+            opponent_surrendered_modal.show();
+            load_game_pane(false)
+        });
+
+        game_socket.on('opponent_played', function (result) {
+            if (result === "win" || result === "draw") {
+                load_game_pane(false);
+            } else {
+                load_game_pane(true);
+            }
+        });
+
+        game_socket.on('connect', function () {
+            game_socket.emit('join_game', game_id);
+        });
+
+
         $(document).ready(function (event) {
-            load_board();
+            load_game_pane(on_turn);
         });
     </script>
+
+    <script src="{{ url_for('static', filename='js/user_socket.js') }}"></script>
 {% endblock %}

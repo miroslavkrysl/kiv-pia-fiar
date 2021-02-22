@@ -29,7 +29,6 @@ class Game:
 
 @dataclass
 class Move:
-    id: int = field(init=False)
     game_id: int
     side: int
     row: int

@@ -36,6 +36,11 @@
             surrender: {
                 POST: "{{ url_for('game_api.post_surrender', game_id=0)[:-1] }}"
             }
+        },
+        html: {
+            game: {
+                GET: "{{ url_for('game.index', id=0)[:-1] }}"
+            },
         }
     };
 </script>

@@ -77,7 +77,7 @@ class MoveSchema(Schema):
     col = fields.Int(required=True)
 
 
-move_schema = GameSchema()
+move_schema = MoveSchema()
 
 
 # --- Board ---
