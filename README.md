@@ -2,6 +2,12 @@
 
 Python Flask app + PostgreSQL DB + Gunicorn http server
 
+## Solution bonus parts
+- password strength evaluation
+- password reset using an e-mail (reset link)
+- save games with all turns and allow replay
+
+
 ## Installation and run
 
 #### Docker: (Gunicorn http server + Flask app) + (PostgreSQL)
