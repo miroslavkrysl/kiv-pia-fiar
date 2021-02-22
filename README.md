@@ -21,13 +21,15 @@ Default server address: `http://127.0.0.1:8000/`
 
 There is default admin account:
 
-email: `admin@example.com`
-password: `admin`
+- email: `admin@example.com`
+- password: `admin`
 
 and two normal accounts:
 
-email: `hello@example.com`
-password: `hello`
+1)
+- email: `hello@example.com`
+- password: `hello`
 
-email: `jello@example.com`
-password: `jello`
+2)
+- email: `jello@example.com`
+- password: `jello`
