@@ -38,6 +38,24 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="friendship-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Remove friendship</h5>
+                </div>
+                <div class="modal-body" id="invite-modal-wait-body">
+                    Do you really want to remove this friendship?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="friendship-modal-yes-button">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
@@ -49,6 +67,8 @@
             backdrop: 'static',
             keyboard: false
         });
+
+        let friendship_modal = new bootstrap.Modal(document.getElementById("friendship-modal"), {});
 
         function show_invite_modal() {
             invite_modal.show();
@@ -95,8 +115,13 @@
                 // --- bind friends buttons ---
                 friends_table.find("[data-btn-unfriend]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    remove_friendship(id, function () {
-                        load_lobby_pane();
+                    friendship_modal.show();
+
+                    $('#friendship-modal-yes-button').click(function () {
+                        remove_friendship(id, function () {
+                            friendship_modal.hide();
+                            load_lobby_pane();
+                        });
                     });
                 });
                 friends_table.find("[data-btn-invite]").click(function (event) {

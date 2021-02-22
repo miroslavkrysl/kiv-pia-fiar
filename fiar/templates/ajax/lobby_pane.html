@@ -92,7 +92,7 @@
                                 <span class="text-success">online</span>
                             </td>
                             <td class="text-end">
-                                {% if not is_request_pending %}
+                                {% if not user.is_request_pending %}
                                     <a class="btn btn-sm btn-primary" data-btn-friend data-id="{{ user.id }}">Add
                                         friend</a>
                                 {% endif %}
