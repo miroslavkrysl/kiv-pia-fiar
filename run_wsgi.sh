@@ -15,4 +15,4 @@ export FLASK_APP=fiar
 flask db:init
 flask db:fill
 
-gunicorn --worker-class eventlet -w 1 'fiar:app'
+gunicorn --worker-class eventlet -w 1 'fiar:app' -b 0.0.0.0:8000
