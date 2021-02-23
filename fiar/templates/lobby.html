@@ -143,7 +143,6 @@
                 // --- bind users buttons ---
                 users_table.find("[data-btn-friend]").click(function (event) {
                     let id = $(this).attr('data-id');
-                    console.log('click');
                     add_request(id, function () {
                         load_lobby_pane();
                     });

@@ -70,7 +70,6 @@
                 });
 
                 if (on_turn) {
-                    console.log(on_turn);
                     let cells = game_pane.find("[data-empty-cell]");
                     cells.addClass('clickable');
 
@@ -96,6 +95,7 @@
         });
 
         game_socket.on('opponent_played', function (result) {
+            console.log(result);
             if (result === "win" || result === "draw") {
                 load_game_pane(false);
             } else {

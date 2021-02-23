@@ -1,6 +1,5 @@
 <script type="application/javascript">
     $app = {
-        this_user_id: {% if auth_user %}{{ auth_user.id | tojson }}{% else %}{{ null }}{% endif %},
         api: {
             friendship: {
                 PUT: "{{ url_for('friendship_api.put_friendship', friend_id=0)[:-1] }}",
