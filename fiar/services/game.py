@@ -61,17 +61,18 @@ class GameService:
         # check end game conditions
         if self.check_fiar(game, side, row, col):
             game.winner = side
-            return MoveResult.WINNER
-
-        if self.is_full(game):
+            result = MoveResult.WINNER
+        elif self.is_full(game):
             game.winner = SIDE_DRAW
-            return MoveResult.DRAW
+            result = MoveResult.DRAW
+        else:
+            result = MoveResult.OK
 
         # switch user on turn
         game.on_turn = SIDE_O if side == SIDE_X else SIDE_X
 
         self.game_repo.update()
-        return MoveResult.OK
+        return result
 
     def accept_invite(self, user: User, opponent: User) -> Game:
         """
