@@ -29,8 +29,12 @@ class GameRepo:
     def add(self, game: Game):
         session = self.db.session
         session.add(game)
-        session.flush()
+        session.commit()
 
     def delete(self, game: Game):
         session = self.db.session
         session.delete(game)
+        session.commit()
+
+    def update(self):
+        self.db.session.commit()

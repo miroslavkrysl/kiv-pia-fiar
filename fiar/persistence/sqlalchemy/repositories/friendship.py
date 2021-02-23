@@ -30,6 +30,7 @@ class FriendshipRepo:
         inverse = Friendship(friendship.recipient_id, friendship.sender_id)
         session.add(friendship)
         session.add(inverse)
+        session.commit()
 
     def delete(self, friendship: Friendship):
         """
@@ -44,3 +45,4 @@ class FriendshipRepo:
             session.delete(inverse)
 
         session.delete(friendship)
+        session.commit()

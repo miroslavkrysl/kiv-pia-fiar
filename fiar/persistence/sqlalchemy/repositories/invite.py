@@ -26,7 +26,9 @@ class InviteRepo:
     def add(self, invite: Invite):
         session = self.db.session
         session.add(invite)
+        session.commit()
 
     def delete(self, invite: Invite):
         session = self.db.session
         session.delete(invite)
+        session.commit()

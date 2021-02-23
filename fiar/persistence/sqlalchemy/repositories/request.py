@@ -24,7 +24,9 @@ class RequestRepo:
     def add(self, request: Request):
         session = self.db.session
         session.add(request)
+        session.commit()
 
     def delete(self, request: Request):
         session = self.db.session
         session.delete(request)
+        session.commit()

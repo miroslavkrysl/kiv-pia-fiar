@@ -59,8 +59,9 @@ class UserRepo:
     def add(self, user: User):
         session = self.db.session
         session.add(user)
-        session.flush()
+        session.commit()
 
     def delete(self, user: User):
         session = self.db.session
         session.delete(user)
+        session.commit()

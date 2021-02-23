@@ -34,3 +34,4 @@ class MoveRepo:
     def delete(self, move: Move):
         session = self.db.session
         session.delete(move)
+        session.commit()
