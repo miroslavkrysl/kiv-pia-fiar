@@ -8,14 +8,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    networks:
-      - app_network
     environment:
-      - DB_DRIVER=postgres
-      - DB_USER=pia
-      - DB_PASSWORD=pia
-      - DB_DB=pia
-      - DB_HOST=127.0.0.1
+      - DB_HOST=db
       - DB_PORT=5432
   db:
     image: postgres:13.1
@@ -25,8 +19,3 @@ services:
       - POSTGRES_USER=pia
       - POSTGRES_PASSWORD=pia
       - POSTGRES_DB=pia
-    networks:
-      - app_network
-networks:
-  app_network:
-    driver: bridge

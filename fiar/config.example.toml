@@ -4,7 +4,7 @@ SECRET_KEY = 'ViCAZJknGALnmoVcMSimhmT5GT4gIpcK89MCiJGtzxC'
 DIALECT = 'postgresql'
 USERNAME = 'pia'
 PASSWORD = 'pia'
-HOST = '127.0.0.1'
+HOST = 'db'
 PORT = 5432
 DATABASE = 'pia'
 
