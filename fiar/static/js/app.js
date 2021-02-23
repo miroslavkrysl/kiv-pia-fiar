@@ -1,3 +1,11 @@
+
+// --- setup ajax ---
+$.ajaxSetup ({
+    // Disable caching of AJAX responses
+    cache: false
+});
+
+
 // --- REST calls ---
 
 function logout(success=null, error=null) {
