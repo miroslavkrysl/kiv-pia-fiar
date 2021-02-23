@@ -31,6 +31,7 @@ class GameService:
         """
         assert side == SIDE_O or side == SIDE_X
         game.winner = SIDE_O if side == SIDE_X else SIDE_X
+        self.game_repo.update()
 
     def do_move(self, game: Game, side: int, row: int, col: int) -> MoveResult:
         """
@@ -69,6 +70,7 @@ class GameService:
         # switch user on turn
         game.on_turn = SIDE_O if side == SIDE_X else SIDE_X
 
+        self.game_repo.update()
         return MoveResult.OK
 
     def accept_invite(self, user: User, opponent: User) -> Game:
