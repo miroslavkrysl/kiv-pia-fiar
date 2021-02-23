@@ -20,13 +20,6 @@ def create_app() -> Flask:
     config = namedtuple('Conf', config_dict.keys())(**config_dict)
     app.config.from_object(config)
 
-    # setup cookie security
-    app.config.update(
-        SESSION_COOKIE_SECURE=True,
-        SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Lax',
-    )
-
     # setup sockets
     app.socket_io = SocketIO(app)
 
